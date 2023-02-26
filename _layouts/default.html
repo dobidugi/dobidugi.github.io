@@ -25,6 +25,38 @@
     <link rel="stylesheet" href="/assets/main.css">
     <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml"
         title="Your awesome title" />
+    <style>
+        h1>a {
+            text-decoration: none;
+            color: black;
+        }
+
+        h1>a:visited {
+            text-decoration: none;
+            color: black;
+        }
+
+        .footer-icons {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .footer-icons>li {
+            list-style-type: none;
+            margin-left: 1rem;
+        }
+
+        .svg-icon {
+            transform: scale(1.5);
+        }
+
+        .svg-icon:hover {
+            fill: skyblue;
+
+        }
+    </style>
 </head>
 
 <body>
@@ -42,8 +74,11 @@
                     </span>
                 </label>
 
-                <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link"
-                        href="/web/">Web</a></div>
+                <div class="trigger">
+                    {% for doc in site.docs %}
+                    <a class="page-link" href="{{ doc.url }}">{{ doc.title }}</a>
+                    {% endfor %}
+                </div>
             </nav>
         </div>
     </header>
@@ -54,35 +89,28 @@
     </main>
     <footer class="site-footer h-card">
         <data class="u-url" href="/"></data>
-
         <div class="wrapper">
-
-            <h2 class="footer-heading">Your awesome title</h2>
-
             <div class="footer-col-wrapper">
-                <div class="footer-col footer-col-1">
-                    <ul class="contact-list">
-                        <li class="p-name">Your awesome title</li>
-                        <li><a class="u-email" href="mailto:this@kakao.com">this@kakao.com</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-col footer-col-2">
-                    <ul class="social-media-list">
-                        <li><a href="https://github.com/jekyll"><svg class="svg-icon">
-                                    <use xlink:href="/assets/minima-social-icons.svg#github"></use>
-                                </svg> <span class="username">jekyll</span></a></li>
-                        <li><a href="https://www.twitter.com/jekyllrb"><svg class="svg-icon">
-                                    <use xlink:href="/assets/minima-social-icons.svg#twitter"></use>
-                                </svg> <span class="username">jekyllrb</span></a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-col footer-col-3">
-                    <p>Write an awesome description for your new site here. You can edit this line in _config.yml. It
-                        will appear in your document head meta (for Google search results) and in your feed.xml site
-                        description.</p>
-                </div>
+                <ul class="footer-icons">
+                    <li><a class="u-email" href="mailto:{{ site.email }}">
+                            <svg class="svg-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"
+                                data-testid="EmailIcon" tabindex="-1" title="Email">
+                                <path
+                                    d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z">
+                                </path>
+                            </svg>
+                            <!-- <span class="" username">{{ site.email }}</span> -->
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/{{ site.github_username }}">
+                            <svg class="svg-icon">
+                                <use xlink:href="/assets/minima-social-icons.svg#github"></use>
+                            </svg>
+                            <!-- <span class="username">{{ site.github_username }}</span> -->
+                        </a>
+                    </li>
+                </ul>
             </div>
 
         </div>

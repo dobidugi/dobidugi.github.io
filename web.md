@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Web
-permalink: /web
+permalink: /Web
 ---
 <ul class="">
     {% for post in site.posts %}

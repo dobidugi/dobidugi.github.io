@@ -51,14 +51,23 @@
 
         .svg-icon:hover {
             fill: skyblue;
+        }
 
+        .content>p {
+            white-space: pre-wrap;
+            line-height: 1.8;
+        }
+
+        .content>h1,
+        h2,
+        h3 {
+            margin: 0
         }
     </style>
 </head>
 
 <body>
     <header class="site-header" role="banner">
-
         <div class="wrapper"><a class="site-title" rel="author" href="/">{{ site.title }} </a>
             <nav class="site-nav">
                 <input type="checkbox" id="nav-trigger" class="nav-trigger" />
@@ -79,9 +88,19 @@
             </nav>
         </div>
     </header>
+
     <main class="page-content" aria-label="Content">
         <div class="wrapper">
-            {{ content }}
+            <h1 class="post-title p-name" itemprop="name headline">{{ page.title }}</h1>
+            <p class="post-meta">
+                <time class="dt-published" datetime="{{ page.date }}" itemprop="datePublished">{{ page.date | date: '%B
+                    %d, %Y' }}
+                </time>
+            </p>
+            <div class="content">
+                {{ content }}
+            </div>
+
         </div>
     </main>
     <script src="https://utteranc.es/client.js" repo="dobidugi/dobidugi.github.io" issue-term="url" theme="github-light"

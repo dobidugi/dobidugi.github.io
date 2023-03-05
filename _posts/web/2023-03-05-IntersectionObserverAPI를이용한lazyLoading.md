@@ -1,7 +1,7 @@
 ---
 title: Intersection Observer API를 이용한 lazy loading
 layout: story
-category: Web
+category: web
 tags: ["web","html","react"]
 ---
 웹 페이지에 접속하면 무수히 많은 리소스를 다운받는걸 볼 수 있다.

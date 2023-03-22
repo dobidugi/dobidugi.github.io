@@ -25,7 +25,7 @@ React 컴포넌트가 리 랜더링되는 상황이 여러가지가 있는데 �
 ## 1. 부모로부터 props을 통해 전달되는 값
 React에서 개발하다보면 부모컴포넌트에서 자식컴포넌트로 값을 보내주는 경우가 자주 발생한다. 
 이때 자식 컴포넌트는 부모에게서 받은 값을 다시 state로 만들필요는 없다.
-```js
+```jsx
 // bad
 import React, { useState } from 'react';
 
@@ -46,7 +46,7 @@ function App() {
 
 export default App;
 ```
-```js
+```jsx
 // good
 import React, { useState } from 'react';
 
@@ -73,7 +73,7 @@ export default App;
 ## 2. 시간이 지나도 변하지 않는값
 시간이 지나도 절대로 변하지 않는 값은 state로 관리할 필요 없다.
 당연한 이야기지만 시간이 지나도 변하지 않는다는 것은 그 값으로 인해 화면을 다시 그릴 일은 없고 리 랜더링할 필요가 없다는 것이다. 이러한값을 state로 관리하는 걸 지양해야 한다.
-```js
+```jsx
 // bad
 import React, { useState } from 'react';
 
@@ -88,7 +88,7 @@ function App() {
 
 export default App;
 ```
-```js
+```jsx
 // good
 import React, { useState } from 'react';
 
@@ -106,7 +106,7 @@ export default App;
 
 ## 3. 컴포넌트 안의 다른 state나 props를 가지고 계산할 수 있는 값
 기존에 있는 state값이나 props값들로 계산이 가능한값이라면 state로 관리할 필요가 없다.
-```js
+```jsx
 // bad
 import React, { useState } from 'react';
 
@@ -143,7 +143,7 @@ export default App;
 위 코드는 입력값이 변경될때마다 onChange함수를 호출하고 값이 3글자 이상이면 flag값을 변경해 유효하다 라는 문구를 출력해주는 코드이지만. 원하는대로 동작하지않고 flag값을 불필요하게 state로 관리할 필요가없다.
 
 그 이유는 value값이 변경되면 어차피 컴포넌트는 리 랜더링되고 flag값은 변경된 value state로 충분히 계산할 수 있기 떄문에 위 코드 처럼 flag를 state값으로 줄 필요는 없다.
-```js
+```jsx
 // good
 import React, { useState } from 'react';
 

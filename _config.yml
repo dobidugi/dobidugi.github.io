@@ -27,6 +27,8 @@ github_username:  dobidugi
 docs:
   - title: Web
     url: /Web 
+  - title: Journal 
+    url: /journal
   - title: About
     url: /about
   

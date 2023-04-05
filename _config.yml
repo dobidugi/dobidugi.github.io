@@ -29,6 +29,8 @@ docs:
     url: /Web 
   - title: Journal 
     url: /journal
+  - title: Summary
+    url: /summary
   - title: About
     url: /about
   

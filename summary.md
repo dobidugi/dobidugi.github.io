@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Summary
-permalink: /summary
+permalink: /summary/
 ---
 <ul class="">
     {% for post in site.posts %}

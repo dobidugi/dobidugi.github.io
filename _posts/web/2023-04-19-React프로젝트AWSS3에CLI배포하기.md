@@ -4,7 +4,7 @@ layout: story
 category: web
 tags: ["aws","deploy","react"]
 ---
-진행중인 프로젝트를 AWS S3에 배포 해보려한다.
+진행중인 React 프로젝트를 AWS S3에 배포 배포하기.
 
 # AWS에 배포 하는이유
 AWS에 배포하는 첫번째 이유로는 가장 크고 많이 사용되는 클라우드 서비스이기 떄문이다.
@@ -97,7 +97,47 @@ AWS S3의 S3는 Simple Storage Service의 약자이며 특정한 파일을 저�
 ![r17](/assets/web/awss3deploy1/17.png)
 
 
-프로젝트를 성공적으로 AWS S3에 배포하는데 성공하였지만 매번 사이트에 접속하여 기존에 있던 파일들을 지우고 프로젝트를 빌드후 파일을 업로드 하는 작업은 매우 번거롭고 시간이 많이걸린다.
+프로젝트를 AWS S3에 배포하는데 성공하였지만 매번 사이트에 접속하여 기존에 있던 파일들을 지우고 다시 프로젝트를 빌드후 파일을 업로드 하는 작업은 매우 번거롭고 시간이 많이걸린다.
+한줄의 명령어만 입력하면 알아서 빌드후 배포되게 구성해보자.
+
+# AWS CLI 
+AWS Command Line Interface(AWS CLI)는 명령줄 셸의 명령을 사용하여 AWS 서비스와 상호 작용할 수 있는 오픈 소스 도구이다.
+[참고](https://docs.aws.amazon.com/ko_kr/cli/latest/userguide/cli-chap-welcome.html)
+
+## AWS CLI 설치하기
+aws cli는  windows, mac, linux 환경을 지원하고 여기 [이곳](https://docs.aws.amazon.com/ko_kr/cli/latest/userguide/getting-started-install.html)에 들어가면 os별로 설치하는 방법이 나와있다.
+
+## 계정 연동하기
+AWS 홈페이지에 접속해 로그인후 프로필을 누르면 보안 자격증명 메뉴가있다.
+![r18](/assets/web/awss3deploy1/18.png)
+
+접속하여 액세스키를 발급받는다.
+![r19](/assets/web/awss3deploy1/19.png)
+
+터미널에 아래 명령어를 입력후 발급받은 액세스키를 입력해준다.
+```
+aws configure
+```
+![r20](/assets/web/awss3deploy1/20.png)
+
+## 배포하기
+빌드 파일들을 명령어를 통해 배포해준다.
+```
+aws s3 sync <build-folder>/ s3://<bucket-name> --delete
+```
+![r21](/assets/web/awss3deploy1/21.png)
+
+## 스크립트 추가하기
+이 과정들을 명령어 한줄만 입력하면 자동으로 처리되게 package.json에 스크립트를 추가해주자
+![r22](/assets/web/awss3deploy1/22.png)
+
+명령어 한 줄만 입력하면 건설 후 자동으로 배포까지 되게 설정했다.
+이로인해 배포하는데 시간을 낭비하지않고 개발에 집중할 수 있게 되었다.
+
+
+
+
+
 
 
 

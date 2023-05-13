@@ -36,6 +36,7 @@ docs:
   
 # paginate: 1
 # paginate_path: "/page:num/"
+google_analytics: G-EMXCGSST68
 
 # Build settings
 theme: minima

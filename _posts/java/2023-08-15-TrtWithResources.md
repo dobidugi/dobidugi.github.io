@@ -82,8 +82,8 @@ public class Abc implements Closeable {
         System.out.println("close method!");
     }
 
-    public void doSometing() {
-        System.out.println("do someting");
+    public void doSomething() {
+        System.out.println("do something");
     }
 }
 ```
@@ -94,12 +94,12 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws IOException {
         try(Abc abc = new Abc()) {
-            abc.doSometing();
+            abc.doSomething();
         }
     }
 }
 
-// do someting
+// do something
 // close method! 
 ```
-예외처리가 끝나고 실행될것들을 close메소드에 적어주면 알아서 실행해주는걸 볼 수 있다.
+예외처리가 끝나고 실행될것들을 close()메소드에 적어주면 알아서 실행해주는걸 볼 수 있다.

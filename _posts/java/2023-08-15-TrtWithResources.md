@@ -5,9 +5,9 @@ category: java
 tags: ["java"]
 ---
 
-개발할때 리소스를 사용하다가 반드시 해재 해줘야하는것들이 있다.
+개발할때 리소스를 사용하고 반드시 해재 해줘야하는것들이 있다.
 예를들어 JDBC를 사용할때 사용되는 ResultSet, Connection, PreparedStatement등이 있다.
-기존에는 try-catch-finally 문에서 close() 메소드를 호출해 자원을 해재했다면,
+기존에 try-catch-finally 문에서 close() 메소드를 호출해 자원을 해재했다면,
 try-with-resources 문을 이용해 편리하게 자원을 해제해보자.
 
 # try-catch-finally
@@ -66,3 +66,40 @@ public void doSometing() {
 try()안에서 선언한 구현체(객체)가 close() 메서드를 가지고 있다해도 모두 동작하는것은 아니다.
 java.io.Closeable 인터페이스를 이용해 구현된 구현체에게만 적용된다.
 그래서 본인이 구현한 구현체가 close()메서드를 호출해주고싶다면 해당 인터페이스를 이용해 구현해줘야한다.
+
+# Closeable 인터페이스를 이용해 구현체 만들기
+
+try-with-resources에서 사용하려면 반드시 java.io.Closeable 인터페이스를 이용해야한다
+```java
+// Abc.java
+import java.io.Closeable;
+import java.io.IOException;
+
+public class Abc implements Closeable {
+
+    @Override
+    public void close() throws IOException {
+        System.out.println("close method!");
+    }
+
+    public void doSometing() {
+        System.out.println("do someting");
+    }
+}
+```
+```java
+// Main.java
+import java.io.IOException;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        try(Abc abc = new Abc()) {
+            abc.doSometing();
+        }
+    }
+}
+
+// do someting
+// close method! 
+```
+예외처리가 끝나고 실행될것들을 close메소드에 적어주면 알아서 실행해주는걸 볼 수 있다.

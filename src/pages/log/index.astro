@@ -1,0 +1,67 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PostRow from '../../components/PostRow.astro';
+
+const posts = (await getCollection('log')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+const categories = [...new Set(posts.map((p) => p.data.category))].sort();
+const years = [...new Set(posts.map((p) => p.data.date.getFullYear()))].sort(
+  (a, b) => b - a
+);
+---
+
+<Base title="LOG — DOBIDUGI" description="전체 글 목록">
+  <header class="page-head">
+    <h1 class="page-title">All Entries</h1>
+    <p class="page-count">{posts.length} ENTRIES LOGGED</p>
+  </header>
+
+  <div class="filters" id="filters">
+    <button class="chip-btn active" data-cat="*">ALL</button>
+    {categories.map((c) => <button class="chip-btn" data-cat={c}>{c}</button>)}
+  </div>
+
+  <section class="section" style="padding-top: 0;">
+    {
+      years.map((year) => (
+        <div class="year-block" data-year={year}>
+          <div class="year-label">{year}</div>
+          <div class="rows">
+            {posts
+              .filter((p) => p.data.date.getFullYear() === year)
+              .map((post) => (
+                <PostRow post={post} />
+              ))}
+          </div>
+        </div>
+      ))
+    }
+  </section>
+</Base>
+
+<script is:inline>
+  (() => {
+    const buttons = document.querySelectorAll('.chip-btn');
+    const rows = document.querySelectorAll('.post-row');
+    const blocks = document.querySelectorAll('.year-block');
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        buttons.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cat = btn.dataset.cat;
+        rows.forEach((row) => {
+          row.style.display =
+            cat === '*' || row.dataset.cat === cat ? '' : 'none';
+        });
+        blocks.forEach((block) => {
+          const visible = block.querySelectorAll(
+            cat === '*' ? '.post-row' : `.post-row[data-cat="${cat}"]`
+          );
+          block.style.display = visible.length ? '' : 'none';
+        });
+      });
+    });
+  })();
+</script>

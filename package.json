@@ -1,0 +1,18 @@
+{
+  "name": "dobidugi.github.io",
+  "type": "module",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "import:vault": "node scripts/import-vault.mjs"
+  },
+  "dependencies": {
+    "astro": "^5.0.0"
+  },
+  "devDependencies": {
+    "gray-matter": "^4.0.3"
+  }
+}

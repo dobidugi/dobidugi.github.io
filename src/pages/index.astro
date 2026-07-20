@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PostRow from '../components/PostRow.astro';
+
+const posts = (await getCollection('log')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+const recent = posts.slice(0, 6);
+---
+
+<Base>
+  <section class="hero">
+    <p class="eyebrow">Backend Engineering Blog</p>
+    <h1 class="hero-title">Mission<br />Log</h1>
+    <p class="hero-sub">Java · Spring · Infra — 궤도에 오르기까지의 기록</p>
+    <a class="scroll-hint" href="#recent" aria-label="아래로 스크롤">▼</a>
+  </section>
+
+  <section class="section" id="recent">
+    <div class="section-head">
+      <h2 class="section-title">Recent Entries</h2>
+      <a class="ghost-link" href="/log/">VIEW ALL {posts.length} →</a>
+    </div>
+    <div class="rows">
+      {recent.map((post) => <PostRow post={post} />)}
+    </div>
+  </section>
+</Base>

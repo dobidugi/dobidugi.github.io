@@ -1,0 +1,70 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('log');
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const d = post.data.date;
+const pad = (n: number) => String(n).padStart(2, '0');
+const dateStr = `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}`;
+---
+
+<Base
+  title={`${post.data.title} — DOBIDUGI`}
+  description={post.data.description ?? post.data.title}
+>
+  <article class="post">
+    <a class="back" href="/log/">← ALL ENTRIES</a>
+    <div class="post-meta">
+      <span class="chip">{post.data.category}</span>
+      <span>{dateStr}</span>
+      <span>{post.data.minutes} MIN READ</span>
+    </div>
+    <h1 class="post-title">{post.data.title}</h1>
+    {
+      post.data.tags.length > 0 && (
+        <div class="post-tags">
+          {post.data.tags.map((t) => (
+            <span>#{t}</span>
+          ))}
+        </div>
+      )
+    }
+    {
+      post.data.source && (
+        <a class="src-link" href={post.data.source} target="_blank" rel="noopener">
+          ORIGINAL SOURCE ↗
+        </a>
+      )
+    }
+    <hr class="post-divider" />
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<script is:inline type="module">
+  if (document.querySelector('.mermaid')) {
+    const { default: mermaid } = await import(
+      'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs'
+    );
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      themeVariables: {
+        fontFamily: 'Barlow, sans-serif',
+        darkMode: true,
+      },
+    });
+    await mermaid.run();
+  }
+</script>

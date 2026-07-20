@@ -681,24 +681,91 @@ main {
 
 /* ---------- responsive ---------- */
 @media (max-width: 720px) {
+  /* 글 목록: 4컬럼 → 메타(날짜·카테고리) 윗줄 + 제목 아랫줄 2단 구성 */
   .post-row {
-    grid-template-columns: 1fr 28px;
-    gap: 6px 14px;
-    padding: 18px 6px;
+    grid-template-columns: auto 1fr 22px;
+    grid-template-areas:
+      'date cat arrow'
+      'main main arrow';
+    gap: 4px 14px;
+    align-items: center;
+    padding: 16px 4px;
   }
 
-  .pr-date,
+  .pr-date {
+    grid-area: date;
+  }
+
   .pr-cat {
-    display: inline;
+    grid-area: cat;
   }
 
   .pr-main {
-    grid-column: 1;
+    grid-area: main;
   }
 
   .pr-arrow {
-    grid-row: 2;
-    grid-column: 2;
+    grid-area: arrow;
+  }
+
+  .pr-title {
+    font-size: 1rem;
+  }
+
+  .section {
+    padding: 56px 20px 80px;
+  }
+
+  .section-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .page-head {
+    padding: 120px 20px 20px;
+  }
+
+  .filters {
+    padding: 0 20px;
+  }
+
+  .year-label {
+    font-size: 2rem;
+    margin: 40px 0 8px;
+  }
+
+  .post {
+    padding: 110px 20px 80px;
+  }
+
+  .post-meta {
+    flex-wrap: wrap;
+    gap: 10px 16px;
+  }
+
+  .post-tags {
+    gap: 10px;
+  }
+
+  .prose {
+    font-size: 0.95rem;
+  }
+
+  .prose pre {
+    padding: 14px 16px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+  }
+
+  .prose .mermaid {
+    padding: 14px;
+  }
+
+  .nav-inner {
+    height: 56px;
+    padding: 0 20px;
   }
 
   .nav-links {
@@ -706,7 +773,13 @@ main {
   }
 
   .brand {
+    font-size: 1.15rem;
     letter-spacing: 0.28em;
+  }
+
+  .footer-row {
+    flex-wrap: wrap;
+    gap: 8px 16px;
   }
 }
 

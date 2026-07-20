@@ -11,9 +11,10 @@ const recent = posts.slice(0, 6);
 
 <Base>
   <section class="hero">
-    <p class="eyebrow">Backend Engineering Blog</p>
-    <h1 class="hero-title">Mission<br />Log</h1>
-    <p class="hero-sub">Java · Spring · Infra — 궤도에 오르기까지의 기록</p>
+    <h1 class="hero-wordmark" aria-label="dobidugi">
+      {'dobidugi'.split('').map((ch, i) => <span class="tw" style={`--i: ${i}`}>{ch}</span>)}
+    </h1>
+    <p class="hero-sub">engineering log</p>
     <a class="scroll-hint" href="#recent" aria-label="아래로 스크롤">▼</a>
   </section>
 

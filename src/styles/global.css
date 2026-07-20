@@ -92,9 +92,8 @@ main {
 .brand {
   font-family: var(--font-cond);
   font-size: 1.35rem;
-  font-weight: 500;
-  letter-spacing: 0.42em;
-  text-transform: uppercase;
+  font-weight: 400;
+  letter-spacing: 0.38em;
 }
 
 .brand span {
@@ -140,21 +139,42 @@ main {
   animation: fade-up 0.9s ease both;
 }
 
-.hero-title {
+.hero-wordmark {
   font-family: var(--font-cond);
-  font-size: clamp(4rem, 14vw, 9.5rem);
+  font-size: clamp(3.4rem, 12vw, 8.5rem);
   font-weight: 300;
-  letter-spacing: 0.14em;
-  line-height: 1.02;
-  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  padding-left: 0.16em; /* letter-spacing이 마지막 글자 뒤에 남기는 공백 보정 */
+  line-height: 1.05;
   animation: fade-up 0.9s 0.15s ease both;
 }
 
+.tw {
+  display: inline-block;
+  animation: twinkle 8s ease-in-out infinite;
+  animation-delay: calc(1.2s + var(--i) * 0.32s);
+}
+
+@keyframes twinkle {
+  0%, 12%, 100% {
+    opacity: 1;
+    text-shadow: none;
+  }
+  3% {
+    opacity: 0.2;
+  }
+  6% {
+    opacity: 1;
+    text-shadow: 0 0 22px rgba(255, 255, 255, 0.75), 0 0 60px rgba(255, 255, 255, 0.25);
+  }
+}
+
 .hero-sub {
-  margin-top: 30px;
-  font-size: 1rem;
+  margin-top: 26px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
   color: var(--muted);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.5em;
   animation: fade-up 0.9s 0.3s ease both;
 }
 
@@ -608,15 +628,27 @@ main {
 .footer-inner {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 34px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  padding: 30px 24px 34px;
   font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.2em;
   color: var(--faint);
+}
+
+.footer-note {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .footer a {
@@ -680,8 +712,9 @@ main {
 
 @media (prefers-reduced-motion: reduce) {
   .eyebrow,
-  .hero-title,
-  .hero-sub {
+  .hero-wordmark,
+  .hero-sub,
+  .tw {
     animation: none;
   }
 

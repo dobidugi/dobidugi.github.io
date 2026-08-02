@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
 
-const VAULT = '/Users/ytlee/developments/vault';
+const VAULT = process.env.VAULT_PATH ?? '/Users/ytlee/developments/vault';
 const OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src/content/log');
 
 // 공개 금지 식별자 안전망 — 하나라도 검출되면 임포트 전체 중단
@@ -43,6 +43,7 @@ const NOTES = [
   { src: 'youtube-summaries/I Tested GPT 5.5 vs Opus 4.7 What You Need to Know.md', slug: 'gpt55-vs-opus47', category: 'YOUTUBE' },
   // 블로그 리뷰
   { src: 'blog-summaries/AI 시대 코프링은 살아남을 수 있을까.md', slug: 'kopring-in-ai-era', category: 'REVIEW' },
+  { src: 'blog-summaries/KotlinLLM 스마트 매크로 IntelliJ 플러그인.md', slug: 'kotlinllm-intellij-plugin', category: 'REVIEW' },
   // 회고
   { src: '회고/원티드 프론트엔드 프리온보딩 인턴쉽 회고록.md', slug: 'wanted-preonboarding-internship-retrospective', category: 'JOURNAL' },
 ];

@@ -44,6 +44,7 @@ const NOTES = [
   // 블로그 리뷰
   { src: 'blog-summaries/AI 시대 코프링은 살아남을 수 있을까.md', slug: 'kopring-in-ai-era', category: 'REVIEW' },
   { src: 'blog-summaries/KotlinLLM 스마트 매크로 IntelliJ 플러그인.md', slug: 'kotlinllm-intellij-plugin', category: 'REVIEW' },
+  { src: 'blog-summaries/DESIGN.md 에이전트를 위한 디자인 시스템 포맷.md', slug: 'design-md-agent-design-system', category: 'REVIEW' },
   // 회고
   { src: '회고/원티드 프론트엔드 프리온보딩 인턴쉽 회고록.md', slug: 'wanted-preonboarding-internship-retrospective', category: 'JOURNAL' },
 ];

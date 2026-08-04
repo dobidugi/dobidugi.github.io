@@ -5,7 +5,7 @@ category: "REVIEW"
 tags: ["reference","article-summary","AI","agentic-dev","design-system","frontend","design-tokens","google"]
 description: "CLAUDE.md가 에이전트에게 \"이 프로젝트에서 일하는 법\"을 알려주듯, DESIGN.md는 \"이 프로젝트가 어떻게 생겨야 하는지\"를 알려주는 파일 포맷이다. 위쪽에는 정확한 값(색상·타이포 토큰…"
 source: "https://github.com/google-labs-code/design.md"
-minutes: 8
+minutes: 9
 ---
 > <span class="co co-abstract">📋 요약 한 줄 요약</span>
 > CLAUDE.md가 에이전트에게 "이 프로젝트에서 일하는 법"을 알려주듯, DESIGN.md는 "이 프로젝트가 어떻게 생겨야 하는지"를 알려주는 파일 포맷이다. 위쪽에는 정확한 값(색상·타이포 토큰), 아래쪽에는 그 값이 왜 존재하고 어떻게 써야 하는지 산문으로 적는다. Google Labs가 스펙과 검증 CLI를 함께 공개했고, 핵심 철학은 의외로 "토큰보다 산문이 중요하다"이다.
@@ -22,9 +22,11 @@ DESIGN.md는 이걸 파일 하나로 해결하자는 제안이다. 프로젝트�
 
 ## 2. 파일이 어떻게 생겼나
 
-DESIGN.md는 두 층으로 되어 있다:
+DESIGN.md 파일 하나는 두 층으로 되어 있다. README의 "Heritage" 예시를 층별로 나눠서 보면:
 
-```md
+**① 위층 — YAML 프론트매터 (기계가 읽는 디자인 토큰).** 파일 맨 위에 `---`로 감싸서 두는, 색상·타이포그래피·둥글기 같은 정확한 값들이다:
+
+```yaml
 ---
 name: Heritage
 colors:
@@ -38,7 +40,11 @@ typography:
 rounded:
   sm: 4px
 ---
+```
 
+**② 아래층 — 마크다운 산문 (그 값들의 이유와 용법).** 같은 파일에서 프론트매터 바로 아래에 이어지는 본문이다. 이 색이 왜 존재하고, 어디에 써야 하고, 어디에 쓰면 안 되는지를 적는다:
+
+```md
 ## Overview
 
 건축적 미니멀리즘과 저널리즘의 무게감. 고급 무광 마감 —
@@ -51,10 +57,11 @@ rounded:
 - **Neutral (#F7F5F2):** 순백보다 부드러운, 따뜻한 석회암 배경.
 ```
 
-- **위쪽 YAML(front matter)** 은 기계가 읽는 **디자인 토큰**이다. 색상, 타이포그래피, 둥글기, 간격, 컴포넌트별 스타일 같은 정확한 값들.
-- **아래쪽 마크다운 산문**은 사람이(그리고 에이전트가) 읽는 **디자인의 이유**다. 이 색이 왜 존재하고, 어디에 써야 하고, 어디에 쓰면 안 되는지.
+토큰(①)은 정확한 값을 주고, 산문(②)은 그 값을 적용하는 감각을 준다. 이 파일을 읽은 에이전트는 어떤 UI를 만들게 될까? 위 스펙을 그대로 따라 렌더링해보면 이런 화면이 나온다:
 
-토큰은 정확한 값을 주고, 산문은 그 값을 적용하는 감각을 준다. 이 파일을 읽은 에이전트는 "Public Sans로 된 잉크색 헤드라인, 따뜻한 석회암 배경, Boston Clay 색 버튼"이 있는 UI를 만들게 된다.
+![Heritage DESIGN.md를 따라 렌더링한 데모 UI — 석회암 배경, 잉크색 헤드라인, Boston Clay 버튼](https://dobidugi.github.io/images/design-md-heritage-ui.png)
+
+깊은 잉크색 헤드라인, 슬레이트색 메타데이터, 그리고 화면에서 유일하게 색을 가진 Boston Clay 버튼 — 산문에 적힌 규칙("인터랙션을 이끄는 유일한 색")이 그대로 반영된다.
 
 전체 그림에서 DESIGN.md가 어디에 놓이는지 보면:
 

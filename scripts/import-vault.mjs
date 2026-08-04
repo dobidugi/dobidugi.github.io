@@ -27,6 +27,7 @@ const NOTES = [
   { src: 'References/Spring/Spring OAuth2 Client.md', slug: 'spring-oauth2-client', category: 'SPRING' },
   { src: 'References/Security/접근제어(RBAC, ABAC).md', slug: 'access-control-rbac-abac', category: 'SECURITY' },
   { src: 'References/Security/암복호화.md', slug: 'encryption-decryption', category: 'SECURITY' },
+  { src: 'References/RN/Expo.md', slug: 'expo', category: 'RN' },
   // 강의 노트
   { src: 'lecture-notes/조합 메소드로 run 메소드 리팩토링하기.md', slug: 'composed-method-refactoring', category: 'LECTURE' },
   { src: 'lecture-notes/값 객체(Value Object).md', slug: 'value-object', category: 'LECTURE' },
@@ -72,6 +73,27 @@ function transformCallouts(text) {
       return `${prefix}<span class="co co-${t}">${text}</span>`;
     }
   );
+}
+
+// "## 관련 노트"의 항목 중 블로그에 발행하지 않는 노트를 가리키는 줄은 제거한다.
+// (vault에는 링크를 남겨두고, 공개 글에서만 죽은 참조가 안 보이게 한다)
+function dropUnpublishedRelatedLinks(text) {
+  const lines = text.split('\n');
+  const out = [];
+  let inSection = false;
+  for (const line of lines) {
+    if (/^## /.test(line)) inSection = /^## 관련 노트\s*$/.test(line);
+    if (inSection && /^\s*[-*]\s/.test(line)) {
+      const targets = [...line.matchAll(/\[\[([^\]|#]+)/g)].map((m) => m[1].trim());
+      if (targets.length > 0 && targets.every((t) => !linkMap.has(t))) continue; // 전부 미발행 → 줄 제거
+    }
+    out.push(line);
+  }
+  // 항목이 모두 사라져 제목만 남은 "## 관련 노트" 섹션은 통째로 제거
+  return out
+    .join('\n')
+    .replace(/\n## 관련 노트\s*\n+(?=(##\s|$))/g, '\n')
+    .replace(/\n## 관련 노트\s*\n*$/, '\n');
 }
 
 function transformWikilinks(text, currentSrc) {
@@ -161,6 +183,7 @@ for (const note of NOTES) {
   let body = content;
   body = stripFirstH1(body);
   body = transformCallouts(body);
+  body = dropUnpublishedRelatedLinks(body);
   body = transformWikilinks(body, note.src);
   body = transformMermaid(body);
   body = body.trim() + '\n';

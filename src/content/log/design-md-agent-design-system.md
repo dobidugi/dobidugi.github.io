@@ -5,7 +5,7 @@ category: "REVIEW"
 tags: ["reference","article-summary","AI","agentic-dev","design-system","frontend","design-tokens","google"]
 description: "CLAUDE.md가 에이전트에게 \"이 프로젝트에서 일하는 법\"을 알려주듯, DESIGN.md는 \"이 프로젝트가 어떻게 생겨야 하는지\"를 알려주는 파일 포맷이다. 위쪽에는 정확한 값(색상·타이포 토큰…"
 source: "https://github.com/google-labs-code/design.md"
-minutes: 7
+minutes: 8
 ---
 > <span class="co co-abstract">📋 요약 한 줄 요약</span>
 > CLAUDE.md가 에이전트에게 "이 프로젝트에서 일하는 법"을 알려주듯, DESIGN.md는 "이 프로젝트가 어떻게 생겨야 하는지"를 알려주는 파일 포맷이다. 위쪽에는 정확한 값(색상·타이포 토큰), 아래쪽에는 그 값이 왜 존재하고 어떻게 써야 하는지 산문으로 적는다. Google Labs가 스펙과 검증 CLI를 함께 공개했고, 핵심 철학은 의외로 "토큰보다 산문이 중요하다"이다.
@@ -56,6 +56,19 @@ rounded:
 
 토큰은 정확한 값을 주고, 산문은 그 값을 적용하는 감각을 준다. 이 파일을 읽은 에이전트는 "Public Sans로 된 잉크색 헤드라인, 따뜻한 석회암 배경, Boston Clay 색 버튼"이 있는 UI를 만들게 된다.
 
+전체 그림에서 DESIGN.md가 어디에 놓이는지 보면:
+
+<pre class="mermaid">
+flowchart LR
+    D["DESIGN.md&lt;br/&gt;토큰(YAML) + 산문(Markdown)"]
+    D --&gt;|매 세션 읽음| A["코딩 에이전트"]
+    A --&gt; U["일관된 UI 코드"]
+    D --&gt; L["lint — 11개 규칙 검증"]
+    D --&gt; F["diff — 버전 비교·회귀 감지"]
+    D --&gt; E["export — Tailwind / W3C DTCG"]
+    L --&gt;|JSON findings| A
+</pre>
+
 ## 3. 의외의 핵심 철학: 토큰보다 산문
 
 값을 정확히 주는 게 중요할 것 같지만, 프로젝트의 PHILOSOPHY 문서는 정반대를 말한다:
@@ -71,7 +84,23 @@ rounded:
 
 **둘째, 무엇을 하지 않을지는 레퍼런스가 공짜로 데려온다.**
 
-모델은 강의 유인물이 뭔지 알기 때문에, 유인물이 **아닌 것**도 안다. 유인물은 빛나지 않고, 그라데이션을 쓰지 않는다. 이걸 일일이 나열할 필요가 없다 — "개"라고 말하면 개가 야옹거리지 않는다는 것까지 전달되는 것과 같다. 금지 목록이 길고 장황해진다면, 그건 애초에 설명이 너무 모호했다는 신호다. 구체적 레퍼런스에 의도적인 Do's and Don'ts 몇 개를 얹는 게 이상적인 조합이다.
+모델은 강의 유인물이 뭔지 알기 때문에, 유인물이 **아닌 것**도 안다. 유인물은 빛나지 않고, 그라데이션을 쓰지 않는다. 이걸 일일이 나열할 필요가 없다 — "개"라고 말하면 개가 야옹거리지 않는다는 것까지 전달되는 것과 같다. 금지 목록이 길고 장황해진다면, 그건 애초에 설명이 너무 모호했다는 신호다. 구체적 레퍼런스에 의도적인 Do's and Don'ts 몇 개를 얹는 게 이상적인 조합이다. PHILOSOPHY 문서의 실제 예시("강의 유인물" 디자인의 Do's and Don'ts)를 일부 옮기면:
+
+```md
+## Do's and Don'ts
+
+- **Don't** 타이틀 페이지에 히어로 연출을 넣지 마라. 진짜 유인물의
+  첫 장은 잡지 표지가 아니라 첫 번째 내용 페이지다.
+- **Don't** 어디에도 Bold를 쓰지 마라.
+- **Don't** 다크 모드, 그라데이션, 글로우, 유리 표면, 그림자,
+  둥근 모서리를 도입하지 마라.
+- **Do** 유인물을 인쇄물로 취급하라. 화면은 매체일 뿐,
+  디자인은 종이 페이지다.
+- **Do** vermilion(주홍색)은 다이어그램 안에만 가둬라. 바깥에서
+  희소하기 때문에 안에서의 존재가 의미를 갖는다.
+- **Do** 소박한 크기 차이를 믿어라. 섹션 제목은 본문의 5배가
+  아니라 ~1.9배면 충분하다.
+```
 
 그래서 이 스펙에서 토큰 값은 "렌더링 명령"이 아니라 "산문이 참조하는 맥락"으로 취급된다. 수십 년간 쌓인 CSS와 디자인 툴의 역할을 다시 발명하지 않겠다는 선긋기다.
 
@@ -81,6 +110,19 @@ rounded:
 
 ```bash
 npx @google/design.md lint DESIGN.md
+```
+
+```json
+{
+  "findings": [
+    {
+      "severity": "warning",
+      "path": "components.button-primary",
+      "message": "textColor (#ffffff) on backgroundColor (#1A1C1E) has contrast ratio 15.42:1 — passes WCAG AA."
+    }
+  ],
+  "summary": { "errors": 0, "warnings": 1, "infos": 1 }
+}
 ```
 
 - **lint** — 파일이 스펙에 맞는지 검사한다. 총 11개 규칙이 있는데 예를 들면: 존재하지 않는 토큰을 참조하면 에러(`{colors.primary}`라고 썼는데 primary가 없음), 버튼의 글자색/배경색 조합이 WCAG 접근성 대비 기준(4.5:1)에 못 미치면 경고, 정의만 하고 아무 데도 안 쓰는 색이 있으면 경고.

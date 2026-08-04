@@ -5,7 +5,7 @@ category: "REVIEW"
 tags: ["reference","article-summary","AI","kotlin","jvm","intellij","llm","codegen","agentic-dev"]
 description: "\"이 변환은 LLM이 알아서 구현해줘\"라고 코드에 한 줄 적어두면, 앱을 실행하다가 그 지점에서 막혔을 때 LLM이 실제 데이터를 보고 코드를 짜서 실행 중인 앱에 즉시 끼워넣고, 그 코드는 프로젝…"
 source: "https://github.com/JetBrains-Research/kotlinllm-plugin"
-minutes: 7
+minutes: 10
 ---
 > <span class="co co-abstract">📋 요약 한 줄 요약</span>
 > "이 변환은 LLM이 알아서 구현해줘"라고 코드에 한 줄 적어두면, 앱을 실행하다가 그 지점에서 막혔을 때 LLM이 실제 데이터를 보고 코드를 짜서 **실행 중인 앱에 즉시 끼워넣고**, 그 코드는 프로젝트에 평범한 Kotlin 파일로 저장되는 JetBrains Research의 실험용 IntelliJ 플러그인. 한 번 만들어진 코드는 다음부터 LLM 없이 그냥 실행된다.
@@ -49,6 +49,24 @@ val service: GithubService = mockLlm()
 4. LLM이 변환 코드를 작성 → 플러그인이 컴파일해서 **실행 중인 앱에 끼워넣음**
 5. 멈췄던 지점부터 새 코드로 **재시도** → 앱은 아무 일 없었다는 듯 계속 진행
 
+전체 흐름을 그림으로 보면 이렇다:
+
+<pre class="mermaid">
+sequenceDiagram
+    participant App as 실행 중인 앱 (JVM)
+    participant Plugin as KotlinLLM 플러그인
+    participant LLM as LLM 에이전트 (Koog + OpenAI)
+    App-&gt;&gt;App: asLlm("JetBrains/kotlin") 호출
+    Note over App: 처리할 코드 없음 → regenerate hook에서 일시정지
+    Plugin-&gt;&gt;App: JDI로 실제 값·타입 캡처
+    Plugin-&gt;&gt;LLM: 캡처한 데이터 + 도구 전달
+    LLM-&gt;&gt;LLM: 코드 작성 (grep, 타입 확인, 이전 실패 참고)
+    LLM-&gt;&gt;Plugin: 구현 본문 제출
+    Plugin-&gt;&gt;Plugin: 생성 소스에 반영 + 컴파일
+    Plugin-&gt;&gt;App: 실행 중인 VM에 클래스 재정의 (hot reload)
+    App-&gt;&gt;App: 멈춘 지점부터 재시도 → 계속 진행
+</pre>
+
 핵심은 그다음이다. 이때 만들어진 코드는 프로젝트 안에 **평범한 Kotlin 파일로 저장된다.** 두 번째 실행부터는 LLM이 전혀 필요 없다. 그냥 저장된 코드가 실행될 뿐이다. 이 파일은 커밋할 수도 있고, 코드 리뷰할 수도 있고, 플러그인 없는 환경에서도 컴파일된다.
 
 > <span class="co co-important">📌 IMPORTANT 설계 목표 세 가지</span>
@@ -74,6 +92,31 @@ KotlinLLM은 이 디버거용 기능들을 사람 대신 **LLM의 코드 수정 
 
 이 구조가 JVM의 클래스 재정의 기능에 의존하기 때문에, 플러그인은 **Kotlin/JVM 전용**이다.
 
+참고로 프로젝트에 넣는 API 파일 자체는 놀랄 만큼 얇다. 레포의 `templates/KotlinLLM.kt` 실제 코드에서 핵심만 보면:
+
+```kotlin
+// 변환 로직의 계약 — 생성되는 코드는 전부 이 인터페이스의 구현체다
+public interface AsLlmParser<F, T> {
+    public fun parse(from: F, hint: String = ""): T
+}
+
+// 개발자가 호출하는 함수 — 타입 정보로 파서를 찾아 위임할 뿐이다
+public inline fun <reified F, reified T> asLlm(from: F, hint: String = ""): T {
+    val parser = AsLlmManager.resolve(typeOf<F>(), typeOf<T>()) as? AsLlmParser<F, T>
+        ?: error("No asLlm parser for ${typeOf<F>()} -> ${typeOf<T>()}")
+    return parser.parse(from, hint)
+}
+```
+
+마법은 전부 플러그인 쪽에 있고, 앱 코드에 들어오는 건 "타입으로 파서를 찾아서 위임"하는 평범한 Kotlin이다. 생성된 코드는 프로젝트 안에 이런 구조로 쌓인다:
+
+```text
+src/main/kotlin/com/jetbrains/kotlinllm/generated
+|-- core       # 부트스트랩 + provider (KType 기준으로 파서 디스패치)
+|-- asLlm      # 생성된 변환 파서들
+`-- mockLlm    # 생성된 인터페이스 구현체들
+```
+
 ## 4. LLM에게는 뭘 주나
 
 LLM에게 "코드 고쳐줘" 하고 프로젝트 전체를 던지는 게 아니다. JetBrains의 Kotlin 에이전트 프레임워크 **Koog** 위에서, 꼭 필요한 도구만 쥐여준다:
@@ -88,7 +131,27 @@ LLM에게 "코드 고쳐줘" 하고 프로젝트 전체를 던지는 게 아니�
 
 ## 5. 실제 예제: GithubIssueRadar
 
-레포에 포함된 샘플 앱. "레포 주소를 주면 초보자가 도전할 만한 이슈를 찾아주는" 프로그램인데, 핵심 로직 세 군데를 전부 `asLlm`으로 처리한다:
+레포에 포함된 샘플 앱. "레포 주소를 주면 초보자가 도전할 만한 이슈를 찾아주는" 프로그램인데, 메인 코드가 실제로 이렇게 생겼다:
+
+```kotlin
+import com.jetbrains.kotlinllm.asLlm
+
+fun main() {
+    val repoUrl = "https://github.com/jetbrains/kotlinconf-app"
+    val radar = GithubIssueRadar()
+
+    val issues = radar.loadIssues(repoUrl, progress = ::println)
+    val beginnerFriendlyIssues = issues.filter { it.isBeginnerFriendly }
+
+    println("Beginner-friendly issues:")
+    beginnerFriendlyIssues.forEachIndexed { index, issue ->
+        println("${index + 1}. ${issue.title}")
+        println("   ${issue.url}")
+    }
+}
+```
+
+겉보기엔 그냥 Kotlin 프로그램이다. 하지만 내부의 핵심 로직 세 군데가 전부 `asLlm`으로 처리된다:
 
 1. 레포 URL → 이슈 API URL 변환
 2. GitHub 이슈 JSON → 데이터 클래스 파싱

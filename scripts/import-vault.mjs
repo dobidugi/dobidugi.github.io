@@ -28,6 +28,10 @@ const NOTES = [
   { src: 'References/Security/접근제어(RBAC, ABAC).md', slug: 'access-control-rbac-abac', category: 'SECURITY' },
   { src: 'References/Security/암복호화.md', slug: 'encryption-decryption', category: 'SECURITY' },
   { src: 'References/RN/Expo.md', slug: 'expo', category: 'RN' },
+  { src: 'References/Kotlin/코틀린 컴파일러 플러그인 (all-open, no-arg).md', slug: 'kotlin-compiler-plugin-allopen-noarg', category: 'KOTLIN' },
+  { src: 'References/FE/Cornerstone3D/Cornerstone3D 시작하기 — 개념·기본 사용법·뷰포트 종류.md', slug: 'cornerstone3d-getting-started', category: 'FE' },
+  { src: 'References/FE/Cornerstone3D/Cornerstone3D 로 JPG·PNG 까지 렌더링하기.md', slug: 'cornerstone3d-custom-image-loader', category: 'FE' },
+  { src: 'References/FE/Cornerstone3D/Cornerstone3D 첫 렌더 검은 화면 (Apple GPU · ANGLE Metal).md', slug: 'cornerstone3d-black-first-render', category: 'FE' },
   // 강의 노트
   { src: 'lecture-notes/조합 메소드로 run 메소드 리팩토링하기.md', slug: 'composed-method-refactoring', category: 'LECTURE' },
   { src: 'lecture-notes/값 객체(Value Object).md', slug: 'value-object', category: 'LECTURE' },

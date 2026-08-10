@@ -32,14 +32,7 @@ const NOTES = [
   { src: 'References/FE/Cornerstone3D/Cornerstone3D 시작하기 — 개념·기본 사용법·뷰포트 종류.md', slug: 'cornerstone3d-getting-started', category: 'FE' },
   { src: 'References/FE/Cornerstone3D/Cornerstone3D 로 JPG·PNG 까지 렌더링하기.md', slug: 'cornerstone3d-custom-image-loader', category: 'FE' },
   { src: 'References/FE/Cornerstone3D/Cornerstone3D 첫 렌더 검은 화면 (Apple GPU · ANGLE Metal).md', slug: 'cornerstone3d-black-first-render', category: 'FE' },
-  // 책 정리
-  { src: 'book-summaries/Debugging Teams — 전체 개요.md', slug: 'debugging-teams-overview', category: 'BOOK' },
-  { src: 'book-summaries/Debugging Teams 1장 — 천재 프로그래머라는 신화.md', slug: 'debugging-teams-1-genius-myth', category: 'BOOK' },
-  { src: 'book-summaries/Debugging Teams 2장 — 훌륭한 팀 문화 만들기.md', slug: 'debugging-teams-2-team-culture', category: 'BOOK' },
-  { src: 'book-summaries/Debugging Teams 3장 — 모든 배에는 선장이 필요하다.md', slug: 'debugging-teams-3-leadership', category: 'BOOK' },
-  { src: 'book-summaries/Debugging Teams 4장 — 해로운 사람 다루기.md', slug: 'debugging-teams-4-poisonous-people', category: 'BOOK' },
-  { src: 'book-summaries/Debugging Teams 5장 — 조직을 다루는 기술.md', slug: 'debugging-teams-5-organization', category: 'BOOK' },
-  { src: 'book-summaries/Debugging Teams 6장 — 사용자도 사람이다.md', slug: 'debugging-teams-6-users', category: 'BOOK' },
+  // 책 정리 — book-summaries/ 는 당분간 vault 전용. 발행 보류
   // 강의 노트
   { src: 'lecture-notes/조합 메소드로 run 메소드 리팩토링하기.md', slug: 'composed-method-refactoring', category: 'LECTURE' },
   { src: 'lecture-notes/값 객체(Value Object).md', slug: 'value-object', category: 'LECTURE' },

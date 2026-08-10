@@ -32,6 +32,14 @@ const NOTES = [
   { src: 'References/FE/Cornerstone3D/Cornerstone3D 시작하기 — 개념·기본 사용법·뷰포트 종류.md', slug: 'cornerstone3d-getting-started', category: 'FE' },
   { src: 'References/FE/Cornerstone3D/Cornerstone3D 로 JPG·PNG 까지 렌더링하기.md', slug: 'cornerstone3d-custom-image-loader', category: 'FE' },
   { src: 'References/FE/Cornerstone3D/Cornerstone3D 첫 렌더 검은 화면 (Apple GPU · ANGLE Metal).md', slug: 'cornerstone3d-black-first-render', category: 'FE' },
+  // 책 정리
+  { src: 'book-summaries/Debugging Teams — 전체 개요.md', slug: 'debugging-teams-overview', category: 'BOOK' },
+  { src: 'book-summaries/Debugging Teams 1장 — 천재 프로그래머라는 신화.md', slug: 'debugging-teams-1-genius-myth', category: 'BOOK' },
+  { src: 'book-summaries/Debugging Teams 2장 — 훌륭한 팀 문화 만들기.md', slug: 'debugging-teams-2-team-culture', category: 'BOOK' },
+  { src: 'book-summaries/Debugging Teams 3장 — 모든 배에는 선장이 필요하다.md', slug: 'debugging-teams-3-leadership', category: 'BOOK' },
+  { src: 'book-summaries/Debugging Teams 4장 — 해로운 사람 다루기.md', slug: 'debugging-teams-4-poisonous-people', category: 'BOOK' },
+  { src: 'book-summaries/Debugging Teams 5장 — 조직을 다루는 기술.md', slug: 'debugging-teams-5-organization', category: 'BOOK' },
+  { src: 'book-summaries/Debugging Teams 6장 — 사용자도 사람이다.md', slug: 'debugging-teams-6-users', category: 'BOOK' },
   // 강의 노트
   { src: 'lecture-notes/조합 메소드로 run 메소드 리팩토링하기.md', slug: 'composed-method-refactoring', category: 'LECTURE' },
   { src: 'lecture-notes/값 객체(Value Object).md', slug: 'value-object', category: 'LECTURE' },
@@ -69,7 +77,9 @@ const CALLOUT_LABEL = {
 
 function transformCallouts(text) {
   return text.replace(
-    /^([ \t]*>\s*)\[!(\w+)\][+-]?\s*(.*)$/gm,
+    // \s 대신 [ \t] 를 쓴다: \s 는 줄바꿈을 포함해서, 제목 없는 콜아웃(`> [!info]`)이
+    // 바로 다음 줄까지 제목으로 빨아들여 라벨 span 안에 통째로 집어넣는다.
+    /^([ \t]*>[ \t]*)\[!(\w+)\][+-]?[ \t]*(.*)$/gm,
     (_, prefix, type, title) => {
       const t = type.toLowerCase();
       const label = CALLOUT_LABEL[t] ?? `📌 ${type.toUpperCase()}`;

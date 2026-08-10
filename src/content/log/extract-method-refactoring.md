@@ -18,7 +18,8 @@ minutes: 4
 > <span class="co co-note">📝 NOTE 정의</span>
 > **메서드 추출 리팩토링**: 이해하기 어려운 긴 메서드에서, 의도를 명확히 표현하는 작은 메서드를 뽑아내는 것.
 
-> <span class="co co-important">📌 IMPORTANT > 여러 리팩토링 패턴 중 **메서드 추출이 가장 중요**하다. 작은 메서드가 다른 모든 리팩토링의 기반이 되기 때문.</span>
+> <span class="co co-important">📌 IMPORTANT</span>
+> 여러 리팩토링 패턴 중 **메서드 추출이 가장 중요**하다. 작은 메서드가 다른 모든 리팩토링의 기반이 되기 때문.
 
 ### 메서드를 작게 만들면 좋은 점
 - 길이가 짧아 **코드 이해가 쉬움**
@@ -30,7 +31,8 @@ minutes: 4
 
 ## 메서드 이름 짓기
 
-> <span class="co co-important">📌 IMPORTANT > 메서드 이름은 **어떻게 구현하는지(How)가 아니라 무엇을 하는지(What)** 를 표현해야 한다. (강의에서 두 번 강조)</span>
+> <span class="co co-important">📌 IMPORTANT</span>
+> 메서드 이름은 **어떻게 구현하는지(How)가 아니라 무엇을 하는지(What)** 를 표현해야 한다. (강의에서 두 번 강조)
 
 - 메서드는 호출 목적으로 만들어지므로 **호출자의 의도**가 드러나게 명명
 - **나쁜 예**: `LinearSearch` / `HashedSearch` / `BinarySearch`

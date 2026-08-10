@@ -57,7 +57,8 @@ class Money {
 
 ### 2) 별칭(Aliasing) 문제
 
-> <span class="co co-important">📌 IMPORTANT > 두 별칭(Client1, Client2)이 **동일한 Money 객체**를 참조하는 상황:</span>
+> <span class="co co-important">📌 IMPORTANT</span>
+> 두 별칭(Client1, Client2)이 **동일한 Money 객체**를 참조하는 상황:
 > - **가변 객체**: Client1이 값을 변경하면 Client2도 같은 변경을 봄 → 예상 못 한 **부수 효과 → 버그**
 > - **불변 객체**: 변경 시 **새 객체를 생성**하므로 Client1만 새 객체를 참조, Client2로 **변경이 전파되지 않음** → 안전
 
@@ -83,7 +84,8 @@ class Money {
 - `Stage.totalPrice`, `Game.price`가 `Long` 타입이지만 실제로는 **"금액"** 개념
 - 개발자가 코드를 볼 때마다 머릿속에서 `Long → 금액`으로 변환해야 함
 
-> <span class="co co-important">📌 IMPORTANT > 코드의 어떤 개념을 머릿속에서 다른 개념으로 해석해야 한다면, 그 개념을 **코드로 명확하게 표현**하는 게 낫다.</span>
+> <span class="co co-important">📌 IMPORTANT</span>
+> 코드의 어떤 개념을 머릿속에서 다른 개념으로 해석해야 한다면, 그 개념을 **코드로 명확하게 표현**하는 게 낫다.
 
 - 해결: `Money` 값 객체를 만들고 `amount`를 그 안에 선언, `plus`/`minus`/`times` 메서드 추가
 - `Long` → `Money`, 연산자 → `Money`의 메서드로 변경 → **금액 개념이 코드에 명시적으로 드러남**
@@ -96,7 +98,8 @@ class Money {
 > <span class="co co-note">📝 NOTE DRY 원칙</span>
 > 모든 지식 조각은 시스템 안에서 **하나의 모호하지 않고 의미 있는 표현**을 가져야 한다. (중복 개념·중복 코드가 존재해서는 안 된다)
 
-> <span class="co co-important">📌 IMPORTANT > **중복 코드 = 요구사항이 변경될 때 함께 수정되는 코드.**</span>
+> <span class="co co-important">📌 IMPORTANT</span>
+> **중복 코드 = 요구사항이 변경될 때 함께 수정되는 코드.**
 > 모양이 같아도 함께 수정되지 않으면 중복 코드가 아니다.
 
 ---
@@ -127,7 +130,8 @@ class Money {
 
 ## 실전 적용: Game 클래스 리팩토링
 
-> <span class="co co-important">📌 IMPORTANT > 값 객체를 추가할 때는 **관련 변수뿐 아니라 그 변수를 이용하는 로직도 함께** 옮기는 것이 핵심이다.</span>
+> <span class="co co-important">📌 IMPORTANT</span>
+> 값 객체를 추가할 때는 **관련 변수뿐 아니라 그 변수를 이용하는 로직도 함께** 옮기는 것이 핵심이다.
 
 ### 1) x, y → Position (위치)
 
@@ -155,7 +159,8 @@ class Position {
     - `contains()` — 좌표가 지도 안에 포함되는지
     - `indexOf()` — 좌표를 배열 인덱스로 변환 (중복 로직 통합)
 
-> <span class="co co-tip">💡 TIP > 함께 사용되는 변수들을 값 객체로 추출하면 **인스턴스 변수와 파라미터 개수가 줄고**, 값 객체는 작아서 여러 곳(예: Room의 x·y)에서 **재사용**할 수 있다.</span>
+> <span class="co co-tip">💡 TIP</span>
+> 함께 사용되는 변수들을 값 객체로 추출하면 **인스턴스 변수와 파라미터 개수가 줄고**, 값 객체는 작아서 여러 곳(예: Room의 x·y)에서 **재사용**할 수 있다.
 
 ### 3) 이동 숫자 → Direction (방향)
 
@@ -170,7 +175,8 @@ class Position {
 
 ## 마무리: 작은 리팩토링의 힘
 
-> <span class="co co-important">📌 IMPORTANT > 클래스 사이의 **책임을 조정하기 전에**, 먼저 개별 클래스 단위로 **작은 리팩토링**을 수행한다.</span>
+> <span class="co co-important">📌 IMPORTANT</span>
+> 클래스 사이의 **책임을 조정하기 전에**, 먼저 개별 클래스 단위로 **작은 리팩토링**을 수행한다.
 > (긴 메서드를 조합 메서드로 분리 / 모호한 개념을 값 객체로 추출)
 > 이렇게 메서드·클래스 수준을 정리하면 책임 조정이 훨씬 수월해진다.
 

@@ -3,10 +3,11 @@ title: "Spring SseEmitter"
 date: 2026-07-20
 category: "SPRING"
 tags: ["spring","sse","server-sent-events","실시간통신","async","servlet","http"]
-description: "<span class=\"co co-tip\">💡 TIP SSE vs WebSocket 선택 기준</span>"
+description: "SseEmitter는 Spring MVC에서 SSE(Server-Sent Events) 연결을 다루는 객체다. 클라이언트와의 HTTP 응답 스트림을 오래 열어두고, 서버가 원할 때마다 데이터를 한 …"
 minutes: 15
 ---
-> <span class="co co-summary">📋 요약 > **SseEmitter는 Spring MVC에서 SSE(Server-Sent Events) 연결을 다루는 객체**다. 클라이언트와의 HTTP 응답 스트림을 **오래 열어두고**, 서버가 원할 때마다 데이터를 한 줄씩 푸시할 수 있게 해준다. 한 명의 클라이언트 = 하나의 SseEmitter 인스턴스.</span>
+> <span class="co co-summary">📋 요약</span>
+> **SseEmitter는 Spring MVC에서 SSE(Server-Sent Events) 연결을 다루는 객체**다. 클라이언트와의 HTTP 응답 스트림을 **오래 열어두고**, 서버가 원할 때마다 데이터를 한 줄씩 푸시할 수 있게 해준다. 한 명의 클라이언트 = 하나의 SseEmitter 인스턴스.
 
 ## 1. 먼저 SSE가 뭔지부터
 

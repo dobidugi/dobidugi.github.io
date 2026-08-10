@@ -462,7 +462,8 @@ class Order(
 
 `copy()`도 함께 사라지는데, 이건 오히려 잘된 일이다. 엔티티를 `copy()`하면 **같은 id를 가진 detached 객체**가 하나 더 생겨서 영속성 컨텍스트가 꼬인다.
 
-> <span class="co co-tip">💡 TIP > `data class`는 DTO에서 쓰라고 있는 기능이다. 엔티티는 "DB 행과 1:1로 대응되는 식별자 있는 객체"고, DTO는 "값 덩어리"다. 성격이 다르니 도구도 다르게 쓴다.</span>
+> <span class="co co-tip">💡 TIP</span>
+> `data class`는 DTO에서 쓰라고 있는 기능이다. 엔티티는 "DB 행과 1:1로 대응되는 식별자 있는 객체"고, DTO는 "값 덩어리"다. 성격이 다르니 도구도 다르게 쓴다.
 
 ### 8. `val` vs `var`
 

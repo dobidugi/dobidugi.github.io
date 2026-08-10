@@ -91,6 +91,25 @@ function transformCallouts(text) {
 
 // "## 관련 노트"의 항목 중 블로그에 발행하지 않는 노트를 가리키는 줄은 제거한다.
 // (vault에는 링크를 남겨두고, 공개 글에서만 죽은 참조가 안 보이게 한다)
+// 자문자답용 복습 절은 vault에만 남기고 블로그에는 싣지 않는다.
+// (요약 성격의 "## 요약" / "## 핵심 요약" 은 본문으로 보고 유지한다)
+const REVIEW_HEADING = /^##\s*(복습\s*질문|남는\s*질문|스스로\s*점검|복습)\s*$/;
+
+function stripReviewSections(text) {
+  const lines = text.split('\n');
+  const out = [];
+  let dropping = false;
+  for (const line of lines) {
+    if (/^##\s/.test(line)) dropping = REVIEW_HEADING.test(line);
+    if (!dropping) out.push(line);
+  }
+  // 절이 사라지면서 생긴 연속 빈 줄과 고아 구분선(---)을 정리한다
+  return out
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/\n---\n+(?=(##\s|$))/g, '\n');
+}
+
 function dropUnpublishedRelatedLinks(text) {
   const lines = text.split('\n');
   const out = [];
@@ -197,6 +216,7 @@ for (const note of NOTES) {
   let body = content;
   body = stripFirstH1(body);
   body = transformCallouts(body);
+  body = stripReviewSections(body);
   body = dropUnpublishedRelatedLinks(body);
   body = transformWikilinks(body, note.src);
   body = transformMermaid(body);

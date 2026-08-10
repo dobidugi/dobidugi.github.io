@@ -8,8 +8,6 @@ minutes: 8
 ---
 둘 다 **"I/O 대기 시간에 thread 자원을 낭비하지 말자"** 라는 같은 문제를 다른 방식으로 해결한다.
 
----
-
 ## 기존 방식 (Platform Thread)
 
 요청마다 OS thread 하나가 배정된다.
@@ -21,8 +19,6 @@ Request → [Thread1] → DB query → ⏳ blocking → 결과 받음 → Respon
 - DB 응답이 올 때까지 thread는 **아무것도 안 하면서 점유**됨
 - thread 하나에 ~1MB memory → 동시 요청 10,000개면 ~10GB
 - Tomcat 기본 thread pool이 200개인 이유 → 넘으면 요청이 queue에 쌓임
-
----
 
 ## Non-blocking IO
 
@@ -62,8 +58,6 @@ return userRepository.findById(id)
 | 목적        | thread 효율              | UX/비즈니스 요구사항        |
 
 대부분의 REST API는 non-blocking IO를 쓰면서도 **결과를 기다려서 synchronous하게 응답**한다. "접수만 하고 나중에 결과 알림"은 비즈니스 설계의 선택이지 non-blocking이라서 그런 것이 아니다.
-
----
 
 ## Virtual Thread (Project Loom)
 
@@ -125,8 +119,6 @@ Order order = orderRepository.findByUser(user); // 여기서도
 return new Response(user, order);               // 깔끔
 ```
 
----
-
 ## 비교
 
 |             | Non-blocking IO              | Virtual Thread                  |
@@ -136,8 +128,6 @@ return new Response(user, order);               // 깔끔
 | 방법          | callback/reactive로 코드 변경     | JVM이 thread를 경량화                |
 | 코드 복잡도      | 높음                           | 낮음 (기존 코드 그대로)                  |
 | 제약          | 없음                           | `synchronized`, `ThreadLocal` 주의 |
-
----
 
 ## 언제 뭘 써야 하나?
 

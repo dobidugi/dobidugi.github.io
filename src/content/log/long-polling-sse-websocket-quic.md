@@ -9,8 +9,6 @@ minutes: 7
 ---
 > [YouTube에서 보기](https://www.youtube.com/watch?v=3Ud6Ds2abO8) | 영상 길이: 10분 43초
 
----
-
 ## 요약
 
 이 영상은 두 기계 간의 데이터 교환을 위한 4가지 기법—**Long Polling**, **Server-Sent Events(SSE)**, **WebSockets**, **QUIC**—을 각각의 동작 원리, 실제 코드 데모, 사용 사례, 장단점 순서로 비교 설명한다.
@@ -136,8 +134,6 @@ minutes: 7
 | SSE | 단방향(서버→클라이언트) | HTTP | 단일 지속 연결로 서버가 계속 push |
 | WebSockets | 양방향(풀 듀플렉스) | TCP (HTTP 업그레이드) | 단일 지속 연결로 실시간 양방향 |
 | QUIC | 양방향 | UDP | TCP+TLS+HTTP/2 통합, 낮은 레이턴시 |
-
----
 
 ## 키워드
 

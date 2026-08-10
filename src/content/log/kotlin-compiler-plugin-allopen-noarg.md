@@ -9,8 +9,6 @@ minutes: 24
 > <span class="co co-abstract">📋 요약 한 줄 요약</span>
 > 코틀린 클래스는 기본이 `final`이고 기본 생성자도 없다. 그런데 Spring은 상속으로 프록시를 만들고 JPA는 빈 객체를 만들어 리플렉션으로 채운다. all-open과 no-arg 플러그인이 **이미 붙이고 있는 애노테이션을 보고** 컴파일 타임에 이 문제를 풀어준다.
 
----
-
 ## "코틀린 플러그인"은 세 가지를 가리킨다
 
 먼저 용어부터 구분해야 헷갈리지 않는다.
@@ -34,8 +32,6 @@ plugins {
 
 앞으로 이 노트에서 그냥 "플러그인"이라고 하면 전부 컴파일러 플러그인 얘기다.
 
----
-
 ## 왜 컴파일러 플러그인이 필요한가
 
 Java의 애노테이션 프로세서(APT)는 **새 파일을 생성**할 수만 있고 기존 클래스를 **수정할 수 없다**. Lombok이 "해킹"이라 불리는 이유 — 비공식 내부 API로 AST를 억지로 건드린다.
@@ -52,8 +48,6 @@ Java의 애노테이션 프로세서(APT)는 **새 파일을 생성**할 수만 
 - **백엔드(IR)** 는 실제 코드를 만들어내는 단계다. no-arg는 여기서 빈 생성자를 만들어 넣고, serialization은 직렬화 함수를 찍어낸다.
 
 여기서 중요한 건 **컴파일할 때 다 끝난다**는 것이다. 실행 중에 리플렉션을 돌리거나 바이트코드를 다시 손대는 비용이 없다. 게다가 공식 확장 지점이라 JDK 버전이 올라가도 안 깨진다 — Lombok과 갈리는 지점이다.
-
----
 
 ## all-open (`kotlin-spring`)
 
@@ -133,8 +127,6 @@ class OrderPolicy { ... }   // 자동으로 open
 > <span class="co co-warning">⚠️ 주의 no-arg는 다르다</span>
 > 이건 all-open 얘기다. `kotlin-jpa`가 쓰는 no-arg는 `@Entity`, `@Embeddable`, `@MappedSuperclass`를 **직접 달았을 때만** 동작한다고 보는 게 안전하다. 어차피 JPA 애노테이션은 메타로 감싸 쓸 일이 거의 없으니 실무에서 문제 되진 않는다.
 
----
-
 ## no-arg (`kotlin-jpa`)
 
 ### 문제
@@ -176,8 +168,6 @@ Order::class.java.getDeclaredConstructor()       //✅ 리플렉션은 접근 �
 
 컴파일러(코틀린/자바 모두)는 이 생성자를 **없는 것처럼** 취급하고, 리플렉션에는 보인다. "프레임워크는 쓸 수 있게, 개발자는 실수로 못 쓰게" — 딱 필요한 만큼만 뚫어주는 설계.
 
----
-
 ## 두 플러그인 대조
 
 | | all-open | no-arg |
@@ -188,8 +178,6 @@ Order::class.java.getDeclaredConstructor()       //✅ 리플렉션은 접근 �
 | **한 문장** | *상속할 수 있게* | *만들 수 있게* |
 
 **엔티티는 둘 다 필요하다.** `kotlin-jpa`가 no-arg만 해주기 때문에 all-open은 직접 등록해야 한다. (아래 주의점 5번)
-
----
 
 ## 실제 build.gradle.kts
 
@@ -263,8 +251,6 @@ plugins {
 
 > <span class="co co-note">📝 NOTE 프리셋을 덮어쓰지 않고 더한다</span>
 > `allOpen {}` 블록을 써도 `kotlin-spring`이 등록한 `@Component`·`@Transactional` 등은 사라지지 않는다. 두 목록이 합쳐진다.
-
----
 
 ## 주의점
 
@@ -462,7 +448,8 @@ class Order(
 
 `copy()`도 함께 사라지는데, 이건 오히려 잘된 일이다. 엔티티를 `copy()`하면 **같은 id를 가진 detached 객체**가 하나 더 생겨서 영속성 컨텍스트가 꼬인다.
 
-> <span class="co co-tip">💡 TIP > `data class`는 DTO에서 쓰라고 있는 기능이다. 엔티티는 "DB 행과 1:1로 대응되는 식별자 있는 객체"고, DTO는 "값 덩어리"다. 성격이 다르니 도구도 다르게 쓴다.</span>
+> <span class="co co-tip">💡 TIP</span>
+> `data class`는 DTO에서 쓰라고 있는 기능이다. 엔티티는 "DB 행과 1:1로 대응되는 식별자 있는 객체"고, DTO는 "값 덩어리"다. 성격이 다르니 도구도 다르게 쓴다.
 
 ### 8. `val` vs `var`
 
@@ -509,8 +496,6 @@ class Order(
 
 즉 6번에서 다룬 `invokeInitializers` 문제는 기본값으로 생성자가 생긴 엔티티에는 **애초에 없다.** 두 경로가 섞여 있으면 "어떤 엔티티는 초기화식이 돌고 어떤 건 안 도는" 상태가 되므로, 플러그인 쪽으로 통일해두는 편이 예측 가능하다. 기본값은 엔티티 인스턴스화를 위해서가 아니라 **필요할 때만** 붙인다.
 
----
-
 ## 적용 확인 방법
 
 바이트코드를 직접 보는 게 확실하다.
@@ -521,8 +506,6 @@ javap -p build/classes/kotlin/main/com/example/Order.class
 
 - **all-open 적용됨** → 클래스 선언에 `final`이 **없음** (`public class com.example.Order`)
 - **no-arg 적용됨** → `public com.example.Order();` 가 목록에 **있음**
-
----
 
 ## 그 외 알아둘 만한 플러그인
 
@@ -544,8 +527,6 @@ javap -p build/classes/kotlin/main/com/example/Order.class
 
 실무에서 no-arg를 켜는 이유는 사실상 JPA 하나.
 
----
-
 ## 정리
 
 결국 이 두 플러그인은 **번역기**다.
@@ -562,8 +543,6 @@ javap -p build/classes/kotlin/main/com/example/Order.class
 - [ ] `allOpen {}`에 `@Entity`, `@MappedSuperclass`, `@Embeddable` 등록했나
 - [ ] Spring Boot 버전에 맞는 패키지명인가 (2.x는 `javax`, 3.x는 `jakarta`)
 - [ ] 엔티티를 `data class`로 만들지 않았나
-
----
 
 ## 링크
 

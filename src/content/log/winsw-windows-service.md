@@ -4,7 +4,7 @@ date: 2026-08-26
 category: "INFRA"
 tags: ["reference","Windows","WinSW","서비스","배포","인프라"]
 description: "아무 실행 파일이나 윈도우 서비스로 감싸주는 래퍼. 설정이 exe 옆 XML 한 장이라 git으로 관리되고, 그게 레지스트리에 설정을 묻어두는 NSSM과의 결정적 차이다."
-minutes: 13
+minutes: 12
 ---
 > <span class="co co-abstract">📋 요약 한 줄 요약</span>
 > 아무 실행 파일이나 윈도우 서비스로 감싸주는 래퍼. 설정이 **exe 옆 XML 한 장**이라 git으로 관리되고, 그게 레지스트리에 설정을 묻어두는 NSSM과의 결정적 차이다.
@@ -51,9 +51,8 @@ myapp.exe    ← WinSW.exe 를 이 이름으로 복사한 것
 myapp.xml    ← 설정. 파일명이 exe와 같아야 한다
 ```
 
-> <span class="co co-warning">⚠️ 주의 버전 선택</span>
-> 안정판은 **v2.x**(현재 v2.12.0)다. v3는 기능이 더 많지만 **오래도록 alpha 상태**(v3.0.0-alpha.11)라, 운영에 올릴 거면 v2를 쓰는 편이 안전하다.
-> 이 노트에서 v3 전용 기능은 따로 표시했다.
+> <span class="co co-warning">⚠️ 주의 v2를 쓴다</span>
+> 안정판은 **v2.x**(현재 v2.12.0)다. v3는 몇 년째 alpha 상태라 운영에 올릴 이유가 없다. 이 노트는 전부 v2 기준이다.
 
 ## NSSM과 무엇이 다른가
 
@@ -69,7 +68,6 @@ NSSM도 여전히 잘 동작하는 좋은 도구다. 단일 exe로 끝나고 대
 | 설정 확인 | `nssm edit`로 GUI를 띄워야 | 파일 열어보면 끝 |
 | 서비스 의존 관계 | 제한적 | `<depend>` |
 | 실패 재시작 | 지원 | 실패 횟수별로 다른 지연 지정 가능 |
-| 생명주기 후크 | 없음 | prestart/poststop 등 (v3) |
 
 NSSM에서는 "그때 그 서버에 뭐라고 설정했더라"가 자주 발생한다. WinSW는 **서비스 정의가 코드가 되어** 저장소에 남는다. 서버를 새로 세울 때 XML을 복사하고 install만 하면 동일한 상태가 재현된다.
 
@@ -228,14 +226,6 @@ NSSM에서는 "그때 그 서버에 뭐라고 설정했더라"가 자주 발생�
 
 생략하면 **LocalSystem**으로 돈다. 로컬 디스크만 쓰면 문제없지만 네트워크 공유에 접근해야 하면 실제 계정이 필요하다.
 
-### v3 전용 (alpha)
-
-| 태그 | 설명 |
-|---|---|
-| `<prestart>` / `<poststart>` | 프로세스 시작 전후에 실행할 명령 |
-| `<prestop>` / `<poststop>` | 정지 전후 |
-| `<download>` | 시작 전에 파일을 받아온다 |
-
 ## 환경 변수
 
 두 가지를 구분해야 한다. **설정 파일 안에서 값을 치환하는 것**과 **자식 프로세스에게 변수를 넘기는 것**이다.
@@ -320,6 +310,5 @@ MinIO가 포트를 바인딩하고 실제로 요청을 받기까지 2~3초 걸�
 
 - [winsw/winsw](https://github.com/winsw/winsw) — 저장소 본체
 - [릴리스](https://github.com/winsw/winsw/releases) — 실행 파일 다운로드. 안정판은 v2.x
-- [XML 설정 레퍼런스 — v2](https://github.com/winsw/winsw/blob/v2/doc/xmlConfigFile.md) — **안정판 기준.** 이 노트가 따르는 문서
+- [XML 설정 레퍼런스](https://github.com/winsw/winsw/blob/v2/doc/xmlConfigFile.md) — 태그 전체 목록 (v2)
 - [YAML 설정](https://github.com/winsw/winsw/blob/v2/doc/yamlConfigFile.md) — v2는 XML 대신 YAML로도 쓸 수 있다
-- [XML 설정 레퍼런스 — v3](https://github.com/winsw/winsw/blob/v3/docs/xml-config-file.md) — 기본 브랜치. v3 전용 태그가 섞여 있으니 v2를 쓴다면 위 문서를 볼 것

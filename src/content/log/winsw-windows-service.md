@@ -4,7 +4,7 @@ date: 2026-08-26
 category: "INFRA"
 tags: ["reference","Windows","WinSW","서비스","배포","인프라"]
 description: "아무 실행 파일이나 윈도우 서비스로 감싸주는 래퍼. 설정이 exe 옆 XML 한 장이라 git으로 관리되고, 그게 레지스트리에 설정을 묻어두는 NSSM과의 결정적 차이다."
-minutes: 11
+minutes: 13
 ---
 > <span class="co co-abstract">📋 요약 한 줄 요약</span>
 > 아무 실행 파일이나 윈도우 서비스로 감싸주는 래퍼. 설정이 **exe 옆 XML 한 장**이라 git으로 관리되고, 그게 레지스트리에 설정을 묻어두는 NSSM과의 결정적 차이다.
@@ -236,7 +236,56 @@ NSSM에서는 "그때 그 서버에 뭐라고 설정했더라"가 자주 발생�
 | `<prestop>` / `<poststop>` | 정지 전후 |
 | `<download>` | 시작 전에 파일을 받아온다 |
 
-## 자주 밟는 함정
+## 환경 변수
+
+두 가지를 구분해야 한다. **설정 파일 안에서 값을 치환하는 것**과 **자식 프로세스에게 변수를 넘기는 것**이다.
+
+### 설정 파일 안의 `%VAR%` 치환
+
+XML 어디에나 `%NAME%` 을 쓰면 WinSW가 읽는 시점에 환경 변수 값으로 바꿔준다.
+
+```xml
+<executable>%JAVA_HOME%\bin\java.exe</executable>
+<arguments>-jar %BASE%\app.jar</arguments>
+```
+
+여기서 **정의되지 않은 변수는 치환되지 않고 `%NAME%` 문자열 그대로 남는다.** 오타를 내도 오류가 나지 않고 그대로 경로에 박힌다. 서비스가 안 뜨는데 로그에 `%JAVA_HOM%\bin\java.exe` 같은 경로가 찍혀 있으면 여기를 의심한다.
+
+`BASE` 는 WinSW가 스스로 채워주는 변수다. **이름을 바꾼 exe가 있는 폴더**를 가리킨다. 설치 경로를 하드코딩하지 않아도 되고, 자식 프로세스에서도 읽을 수 있어서 앱이 자기 위치를 찾는 데 쓸 수 있다.
+
+### 자식 프로세스에 넘기기
+
+`<env>` 는 필요한 만큼 반복해서 쓴다.
+
+```xml
+<env name="SPRING_PROFILES_ACTIVE" value="prod"/>
+<env name="TZ" value="Asia/Seoul"/>
+<env name="APP_HOME" value="%BASE%"/>
+```
+
+### 서비스는 내 환경 변수를 못 본다
+
+가장 자주 걸리는 부분이다.
+
+- 서비스는 로그인 세션과 무관하게 돌아서 **사용자 환경 변수를 상속받지 않는다.** 내 계정에 설정한 `PATH` 나 `JAVA_HOME` 은 보이지 않는다
+- 시스템 환경 변수는 보이지만 **프로세스가 시작될 때 한 번 읽는다.** 값을 바꾸면 서비스를 재시작해야 반영된다
+- 콘솔에서 잘 되던 게 서비스로 올리면 "java를 찾을 수 없다"로 죽는 전형적인 이유가 이것이다
+
+그래서 실행 파일은 `<executable>` 에 **절대 경로**로 적거나, 시스템 변수인 `%JAVA_HOME%` 을 쓰는 편이 안전하다. PATH에 의존하지 않는 게 좋다.
+
+### 비밀값을 어떻게 둘 것인가
+
+XML은 git에 들어간다. 비밀번호를 그대로 적으면 저장소에 남는다.
+
+앞의 `storage.xml` 예시가 값을 직접 쓰지 않고 `%MINIO_ROOT_USER%` 로 참조한 이유가 이것이다. 선택지는 대략 셋이다.
+
+- 시스템 환경 변수에 넣고 `%VAR%` 로 참조한다. 서비스 계정이 읽을 수 있어야 한다
+- XML은 템플릿만 저장소에 두고, 배포 스크립트가 값을 채워 설치한다
+- 앱이 별도 설정 파일이나 시크릿 저장소에서 직접 읽게 한다
+
+`<serviceaccount>` 의 `<password>` 도 같은 문제를 갖는다. 도메인 환경이라면 gMSA를 쓸 수 있는지 확인해볼 만하다. 비밀번호를 저장할 필요 자체가 없어진다.
+
+## 미리 알고 갈 것
 
 ### `<depend>`는 순서만 보장하지 준비 상태가 아니다
 
@@ -271,5 +320,6 @@ MinIO가 포트를 바인딩하고 실제로 요청을 받기까지 2~3초 걸�
 
 - [winsw/winsw](https://github.com/winsw/winsw) — 저장소 본체
 - [릴리스](https://github.com/winsw/winsw/releases) — 실행 파일 다운로드. 안정판은 v2.x
-- [XML 설정 레퍼런스 — v2](https://github.com/winsw/winsw/blob/v2/doc/exeConfigFile.md) — **안정판 기준.** 이 노트가 따르는 문서
+- [XML 설정 레퍼런스 — v2](https://github.com/winsw/winsw/blob/v2/doc/xmlConfigFile.md) — **안정판 기준.** 이 노트가 따르는 문서
+- [YAML 설정](https://github.com/winsw/winsw/blob/v2/doc/yamlConfigFile.md) — v2는 XML 대신 YAML로도 쓸 수 있다
 - [XML 설정 레퍼런스 — v3](https://github.com/winsw/winsw/blob/v3/docs/xml-config-file.md) — 기본 브랜치. v3 전용 태그가 섞여 있으니 v2를 쓴다면 위 문서를 볼 것

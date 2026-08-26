@@ -17,6 +17,7 @@ const NOTES = [
   { src: 'References/Infra/ECS Fargate 셋업 가이드.md', slug: 'ecs-fargate-setup-guide', category: 'INFRA' },
   { src: 'References/Infra/ECS 배포·롤백.md', slug: 'ecs-deploy-rollback', category: 'INFRA' },
   { src: 'References/Infra/ECS 트러블슈팅.md', slug: 'ecs-troubleshooting', category: 'INFRA' },
+  { src: 'References/Infra/WinSW — 실행 파일을 윈도우 서비스로 등록하기.md', slug: 'winsw-windows-service', category: 'INFRA' },
   { src: 'References/CS/가상 스레드와 논블로킹 IO.md', slug: 'virtual-thread-nonblocking-io', category: 'CS' },
   { src: 'References/CS/Oauth.md', slug: 'oauth', category: 'CS' },
   { src: 'References/CS/Oauth 인증.md', slug: 'oauth-social-login', category: 'CS' },

@@ -31,6 +31,7 @@ const NOTES = [
   { src: 'References/Security/Semgrep — 코드를 패턴으로 읽는 SAST 엔진.md', slug: 'semgrep', category: 'penetration-testing' },
   { src: 'References/Security/SARIF — 보안 스캐너 결과의 공통 언어.md', slug: 'sarif', category: 'penetration-testing' },
   { src: 'References/RN/Expo.md', slug: 'expo', category: 'RN' },
+  { src: 'References/FE/pnpm vs npm — 차이와 선택 기준.md', slug: 'pnpm-vs-npm', category: 'FE' },
   { src: 'References/Kotlin/코틀린 컴파일러 플러그인 (all-open, no-arg).md', slug: 'kotlin-compiler-plugin-allopen-noarg', category: 'KOTLIN' },
   { src: 'References/FE/Cornerstone3D/Cornerstone3D 시작하기 — 개념·기본 사용법·뷰포트 종류.md', slug: 'cornerstone3d-getting-started', category: 'FE' },
   { src: 'References/FE/Cornerstone3D/Cornerstone3D 로 JPG·PNG 까지 렌더링하기.md', slug: 'cornerstone3d-custom-image-loader', category: 'FE' },

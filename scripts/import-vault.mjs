@@ -24,6 +24,7 @@ const NOTES = [
   { src: 'References/Architecture/DDD 개념 정리.md', slug: 'ddd-concepts', category: 'ARCHITECTURE' },
   { src: 'References/Architecture/BFF 패턴 (Backend for Frontend).md', slug: 'bff-pattern', category: 'ARCHITECTURE' },
   { src: 'References/Architecture/MSA API Gateway와 라우팅.md', slug: 'msa-api-gateway', category: 'ARCHITECTURE' },
+  { src: 'References/Architecture/감사 로그를 설계하고 구축하며 고민한 것들.md', slug: 'audit-and-access-log-design', category: 'ARCHITECTURE' },
   { src: 'References/Spring/Spring SseEmitter.md', slug: 'spring-sse-emitter', category: 'SPRING' },
   { src: 'References/Spring/Spring OAuth2 Client.md', slug: 'spring-oauth2-client', category: 'SPRING' },
   { src: 'References/Security/접근제어(RBAC, ABAC).md', slug: 'access-control-rbac-abac', category: 'SECURITY' },

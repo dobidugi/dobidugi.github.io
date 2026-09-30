@@ -13,6 +13,9 @@ const OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src/cont
 const FORBIDDEN = /sanvel|ark-korea|ark-inc|c7awmccqc41d|315054051|590183915415/i;
 
 const NOTES = [
+  // 수학 기초
+  { src: 'References/math/벡터의 변화량과 유클리드 거리.md', slug: 'vector-change-euclidean-distance', category: 'MATH' },
+  { src: 'References/math/벡터의 내적과 추천 점수.md', slug: 'dot-product-recommendation-score', category: 'MATH' },
   // References
   { src: 'References/Infra/ECS Fargate 셋업 가이드.md', slug: 'ecs-fargate-setup-guide', category: 'INFRA' },
   { src: 'References/Infra/ECS 배포·롤백.md', slug: 'ecs-deploy-rollback', category: 'INFRA' },
@@ -208,7 +211,7 @@ for (const note of NOTES) {
     console.warn(`✗ 파일 없음, 건너뜀: ${note.src}`);
     continue;
   }
-  const raw = fs.readFileSync(filePath, 'utf8');
+  const raw = fs.readFileSync(filePath, 'utf8').replace(/\r\n?/g, '\n');
   const { data: fm, content } = matter(raw);
 
   let body = content;

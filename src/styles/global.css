@@ -481,6 +481,12 @@ main {
   margin: 0.9em 0;
 }
 
+.prose .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.4em 0;
+}
+
 .prose ul,
 .prose ol {
   margin: 0.9em 0;

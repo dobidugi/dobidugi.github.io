@@ -2,11 +2,12 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PostRow from '../../components/PostRow.astro';
+import { getCategoryLabel, getPostCategories } from '../../lib/categories';
 
 const posts = (await getCollection('log')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
-const categories = [...new Set(posts.map((p) => p.data.category))].sort();
+const categories = [...new Set(posts.flatMap((p) => getPostCategories(p.data)))].sort();
 const years = [...new Set(posts.map((p) => p.data.date.getFullYear()))].sort(
   (a, b) => b - a
 );
@@ -20,7 +21,7 @@ const years = [...new Set(posts.map((p) => p.data.date.getFullYear()))].sort(
 
   <div class="filters" id="filters">
     <button class="chip-btn active" data-cat="*">ALL</button>
-    {categories.map((c) => <button class="chip-btn" data-cat={c}>{c}</button>)}
+    {categories.map((c) => <button class="chip-btn" data-cat={c}>{getCategoryLabel(c)}</button>)}
   </div>
 
   <section class="section" style="padding-top: 0;">
@@ -52,14 +53,14 @@ const years = [...new Set(posts.map((p) => p.data.date.getFullYear()))].sort(
         btn.classList.add('active');
         const cat = btn.dataset.cat;
         rows.forEach((row) => {
+          const categories = JSON.parse(row.dataset.categories);
           row.style.display =
-            cat === '*' || row.dataset.cat === cat ? '' : 'none';
+            cat === '*' || categories.includes(cat) ? '' : 'none';
         });
         blocks.forEach((block) => {
-          const visible = block.querySelectorAll(
-            cat === '*' ? '.post-row' : `.post-row[data-cat="${cat}"]`
-          );
-          block.style.display = visible.length ? '' : 'none';
+          const visible = Array.from(block.querySelectorAll('.post-row'))
+            .some((row) => row.style.display !== 'none');
+          block.style.display = visible ? '' : 'none';
         });
       });
     });

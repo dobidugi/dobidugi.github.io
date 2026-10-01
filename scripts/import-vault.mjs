@@ -228,6 +228,10 @@ for (const note of NOTES) {
     : path.basename(note.src, '.md');
   const date = toDateString(fm.date, filePath);
   const tags = Array.isArray(fm.tags) ? fm.tags.map(String) : [];
+  const categories = Array.isArray(fm.categories)
+    ? [...new Set(fm.categories.filter((c) => typeof c === 'string').map((c) => c.trim()))]
+        .filter((c) => c && c !== note.category)
+    : [];
   const description = deriveDescription(body);
   const minutes = Math.max(1, Math.round(body.length / 700));
   const source = typeof fm.source === 'string' && fm.source.startsWith('http') ? fm.source : null;
@@ -237,6 +241,7 @@ for (const note of NOTES) {
     `title: ${JSON.stringify(title)}`,
     `date: ${date}`,
     `category: ${JSON.stringify(note.category)}`,
+    categories.length ? `categories: ${JSON.stringify(categories)}` : null,
     `tags: ${JSON.stringify(tags)}`,
     description ? `description: ${JSON.stringify(description)}` : null,
     source ? `source: ${JSON.stringify(source)}` : null,

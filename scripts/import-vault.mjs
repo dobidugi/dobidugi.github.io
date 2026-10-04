@@ -16,6 +16,7 @@ const NOTES = [
   // 수학 기초
   { src: 'References/math/벡터의 변화량과 유클리드 거리.md', slug: 'vector-change-euclidean-distance', category: 'MATH' },
   { src: 'References/math/벡터의 내적과 추천 점수.md', slug: 'dot-product-recommendation-score', category: 'MATH' },
+  { src: 'References/math/정규화와 코사인 유사도.md', slug: 'normalization-cosine-similarity', category: 'MATH', imageDir: 'assets/normalization-cosine' },
   // References
   { src: 'References/Infra/ECS Fargate 셋업 가이드.md', slug: 'ecs-fargate-setup-guide', category: 'INFRA' },
   { src: 'References/Infra/ECS 배포·롤백.md', slug: 'ecs-deploy-rollback', category: 'INFRA' },
@@ -147,6 +148,34 @@ function transformWikilinks(text, currentSrc) {
   );
 }
 
+// 이미지 폴더를 명시한 노트의 Markdown 이미지만 공개 경로로 복사한다.
+function transformLocalImages(text, note) {
+  if (!note.imageDir) return text;
+  const sourceDir = fs.realpathSync(path.resolve(VAULT, path.dirname(note.src), note.imageDir));
+  const publicRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../public/images');
+  const targetDir = path.resolve(publicRoot, note.slug);
+  if (!/^[a-z0-9-]+$/.test(note.slug)) throw new Error('Invalid image destination slug');
+  const prefix = note.imageDir + '/';
+  return text.replace(/(!\[[^\]]*\])\(([^)\s]+)\)/g, (match, alt, url) => {
+    if (!url.startsWith(prefix)) return match;
+    const relative = url.slice(prefix.length);
+    const source = fs.realpathSync(path.resolve(sourceDir, relative));
+    const sourceRelative = path.relative(sourceDir, source);
+    const target = path.resolve(targetDir, relative);
+    const targetRelative = path.relative(targetDir, target);
+    if ([sourceRelative, targetRelative].some((p) => !p || p.startsWith('..') || path.isAbsolute(p))) {
+      throw new Error('Image path must stay inside its declared directory');
+    }
+    if (!/\.(png|jpe?g|webp|gif|svg)$/i.test(source) || !fs.statSync(source).isFile()) {
+      throw new Error('Unsupported local image');
+    }
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(source, target);
+    const publicPath = relative.split('/').map(encodeURIComponent).join('/');
+    return `${alt}(/images/${note.slug}/${publicPath})`;
+  });
+}
+
 function transformMermaid(text) {
   return text.replace(/```mermaid\n([\s\S]*?)```/g, (_, code) => {
     const escaped = code
@@ -221,6 +250,7 @@ for (const note of NOTES) {
   body = dropUnpublishedRelatedLinks(body);
   body = transformWikilinks(body, note.src);
   body = transformMermaid(body);
+  body = transformLocalImages(body, note);
   body = body.trim() + '\n';
 
   const title = typeof fm.title === 'string' && fm.title.trim()

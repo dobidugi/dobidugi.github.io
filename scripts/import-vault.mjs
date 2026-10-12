@@ -26,6 +26,7 @@ const NOTES = [
   { src: 'References/CS/가상 스레드와 논블로킹 IO.md', slug: 'virtual-thread-nonblocking-io', category: 'CS' },
   { src: 'References/CS/Oauth.md', slug: 'oauth', category: 'CS' },
   { src: 'References/CS/Oauth 인증.md', slug: 'oauth-social-login', category: 'CS' },
+  { src: 'References/Architecture/RAG 이해하기.md', slug: 'rag-basics', category: 'ARCHITECTURE' },
   { src: 'References/Architecture/DDD 개념 정리.md', slug: 'ddd-concepts', category: 'ARCHITECTURE' },
   { src: 'References/Architecture/BFF 패턴 (Backend for Frontend).md', slug: 'bff-pattern', category: 'ARCHITECTURE' },
   { src: 'References/Architecture/MSA API Gateway와 라우팅.md', slug: 'msa-api-gateway', category: 'ARCHITECTURE' },

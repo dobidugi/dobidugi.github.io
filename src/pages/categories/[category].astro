@@ -1,0 +1,12 @@
+---
+import { getCollection } from 'astro:content';
+import PostArchive from '@/components/PostArchive.astro';
+import { getCategories, getCategorySlug } from '@/lib/categories';
+import { getSortedPosts } from '@/utils/getSortedPosts';
+export async function getStaticPaths() {
+  const categories=getCategories(getSortedPosts(await getCollection('log')));
+  return categories.map(category=>({params:{category:getCategorySlug(category.id)},props:{selected:category.id}}));
+}
+const {selected}=Astro.props;
+---
+<PostArchive {selected} />

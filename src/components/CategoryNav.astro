@@ -1,0 +1,10 @@
+---
+import type { Category } from '@/lib/categories';
+import { getCategoryUrl } from '@/lib/categories';
+interface Props { categories: Category[]; total: number; selected?: string }
+const {categories,total,selected} = Astro.props;
+---
+<nav class="category-nav" aria-label="게시물 카테고리">
+  <a href="/" aria-current={!selected ? 'page' : undefined}>전체 <span>{total}</span></a>
+  {categories.map(category => <a href={getCategoryUrl(category.id)} aria-current={selected === category.id ? 'page' : undefined}>{category.label} <span>{category.count}</span></a>)}
+</nav>

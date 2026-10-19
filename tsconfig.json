@@ -1,5 +1,11 @@
 {
-  "extends": "astro/tsconfigs/base",
-  "include": [".astro/types.d.ts", "src/**/*"],
-  "exclude": ["dist"]
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "src/**/*", "astro.config.ts", "astro-paper.config.ts"],
+  "exclude": ["dist", "public", "node_modules"],
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/astro-paper.config": ["./astro-paper.config"]
+    }
+  }
 }

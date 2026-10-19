@@ -1,0 +1,228 @@
+<script>
+  type Theme = "light" | "dark";
+  type Diagram = {
+    element: HTMLElement;
+    source: string;
+    label: string;
+    theme?: Theme;
+  };
+
+  const diagrams = new Map<HTMLElement, Diagram>();
+  let library: Promise<typeof import("mermaid")["default"]> | undefined;
+  let sequence = 0;
+  let revision = 0;
+  let pending = false;
+  let rendering = false;
+
+  const getTheme = (): Theme =>
+    document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+
+  function sourceBlock(source: string) {
+    const pre = document.createElement("pre");
+    pre.dataset.mermaidSource = "";
+    pre.tabIndex = 0;
+    const code = document.createElement("code");
+    code.textContent = source;
+    pre.append(code);
+    return pre;
+  }
+
+  function collectDiagrams() {
+    for (const element of diagrams.keys()) {
+      if (!element.isConnected) diagrams.delete(element);
+    }
+
+    document.querySelectorAll<HTMLPreElement>("pre.mermaid").forEach(pre => {
+      // Read once, before SVG replacement. textContent decodes the importer's
+      // escaped arrows; a code-copy button must never become diagram source.
+      const original = pre.cloneNode(true) as HTMLPreElement;
+      original.querySelectorAll("button").forEach(button => button.remove());
+      const source = original.textContent ?? "";
+      const element = document.createElement("figure");
+      element.className = "mermaid-diagram not-prose";
+      const label = `본문 다이어그램 ${diagrams.size + 1}`;
+      element.setAttribute("aria-label", label);
+      element.append(sourceBlock(source));
+      pre.replaceWith(element);
+      diagrams.set(element, { element, source, label });
+    });
+  }
+
+  function showFallback(diagram: Diagram) {
+    const message = document.createElement("p");
+    message.className = "mermaid-fallback";
+    message.setAttribute("role", "status");
+    message.textContent =
+      "다이어그램을 표시하지 못했습니다. 아래 원문을 확인해 주세요.";
+    diagram.element.replaceChildren(message, sourceBlock(diagram.source));
+    diagram.element.dataset.state = "error";
+  }
+
+  async function renderCurrentPage() {
+    collectDiagrams();
+    if (diagrams.size === 0) return;
+
+    const currentRevision = revision;
+    const theme = getTheme();
+    let mermaid: typeof import("mermaid")["default"];
+    try {
+      library ??= import("mermaid")
+        .then(module => module.default)
+        .catch(error => {
+          library = undefined;
+          throw error;
+        });
+      [mermaid] = await Promise.all([library, document.fonts.ready]);
+    } catch {
+      if (currentRevision === revision) {
+        for (const diagram of diagrams.values()) showFallback(diagram);
+      }
+      return;
+    }
+    if (currentRevision !== revision) return;
+
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "strict",
+      suppressErrorRendering: true,
+      theme: theme === "dark" ? "dark" : "default",
+      fontFamily: getComputedStyle(document.body).fontFamily,
+      htmlLabels: false,
+    });
+
+    for (const diagram of diagrams.values()) {
+      if (currentRevision !== revision) return;
+      if (!diagram.element.isConnected || diagram.theme === theme) continue;
+
+      // Mermaid measures SVG in the document. Keep that work outside the
+      // article, then replace the figure atomically with the finished result.
+      const stage = document.createElement("div");
+      stage.setAttribute("aria-hidden", "true");
+      stage.style.cssText =
+        "position:fixed;left:-100000px;top:0;visibility:hidden;pointer-events:none";
+      stage.style.width = `${diagram.element.clientWidth || 720}px`;
+      document.body.append(stage);
+      diagram.element.setAttribute("aria-busy", "true");
+
+      try {
+        const { svg } = await mermaid.render(
+          `blog-mermaid-${++sequence}`,
+          diagram.source,
+          stage
+        );
+        if (currentRevision !== revision || !diagram.element.isConnected) continue;
+
+        const canvas = document.createElement("div");
+        canvas.className = "mermaid-canvas";
+        canvas.tabIndex = 0;
+        canvas.setAttribute("role", "group");
+        canvas.setAttribute("aria-label", `${diagram.label}, 가로 스크롤 가능`);
+        // Mermaid's strict renderer sanitizes this SVG; source is never
+        // assigned directly to innerHTML and click bindings stay disabled.
+        canvas.innerHTML = svg;
+        const graphic = canvas.querySelector("svg");
+        if (graphic?.viewBox.baseVal.width) {
+          graphic.style.width = `${Math.ceil(graphic.viewBox.baseVal.width)}px`;
+        }
+        if (graphic && !graphic.hasAttribute("aria-labelledby")) {
+          graphic.setAttribute("role", "img");
+          graphic.setAttribute("aria-label", diagram.label);
+        }
+        diagram.element.replaceChildren(canvas);
+        diagram.element.dataset.state = "ready";
+        diagram.theme = theme;
+      } catch {
+        if (currentRevision === revision && diagram.element.isConnected) {
+          showFallback(diagram);
+          diagram.theme = theme;
+        }
+      } finally {
+        stage.remove();
+        diagram.element.removeAttribute("aria-busy");
+      }
+    }
+  }
+
+  async function flush() {
+    rendering = true;
+    try {
+      while (pending) {
+        pending = false;
+        await renderCurrentPage();
+      }
+    } catch {
+      for (const diagram of diagrams.values()) {
+        if (diagram.element.isConnected) showFallback(diagram);
+      }
+    } finally {
+      rendering = false;
+    }
+  }
+
+  function schedule() {
+    revision++;
+    pending = true;
+    // Serialize renders: Mermaid configuration is global, so a theme change
+    // must not initialize it while another diagram is still being rendered.
+    if (!rendering) void flush();
+  }
+
+  let observedTheme = getTheme();
+  const observer = new MutationObserver(() => {
+    const theme = getTheme();
+    if (theme !== observedTheme) {
+      observedTheme = theme;
+      schedule();
+    }
+  });
+
+  function setup() {
+    observedTheme = getTheme();
+    observer.disconnect();
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    schedule();
+  }
+
+  // Astro bundles this module once, so navigation reuses these listeners.
+  document.addEventListener("astro:page-load", setup);
+  document.addEventListener("astro:before-swap", () => {
+    revision++;
+    pending = false;
+    observer.disconnect();
+  });
+  setup();
+</script>
+
+<style is:global>
+  .mermaid-diagram {
+    margin: 1.75rem 0;
+    min-width: 0;
+  }
+
+  .mermaid-canvas {
+    overflow-x: auto;
+    padding: 1rem 0;
+  }
+
+  .mermaid-canvas svg {
+    display: block;
+    height: auto;
+    margin-inline: auto;
+    max-width: none !important;
+  }
+
+  .mermaid-diagram pre[data-mermaid-source] {
+    overflow-x: auto;
+    padding: 1rem;
+    font-size: 0.875rem;
+    white-space: pre;
+  }
+
+  .mermaid-fallback {
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+  }
+</style>

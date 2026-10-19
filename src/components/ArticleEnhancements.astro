@@ -1,0 +1,27 @@
+<script>
+  function enhanceArticle() {
+    const article=document.querySelector('#article');
+    if(!article || article.hasAttribute('data-enhanced'))return;
+    article.setAttribute('data-enhanced','');
+    article.querySelectorAll('table').forEach(table=>{
+      const wrapper=document.createElement('div');
+      wrapper.className='table-scroll'; wrapper.tabIndex=0; wrapper.setAttribute('role','region'); wrapper.setAttribute('aria-label','가로로 스크롤할 수 있는 표');
+      table.before(wrapper); wrapper.append(table);
+    });
+    article.querySelectorAll<HTMLElement>('h2[id],h3[id],h4[id]').forEach(heading=>{
+      const anchor=document.createElement('a'); anchor.href='#'+heading.id; anchor.className='heading-link'; anchor.textContent='#'; anchor.setAttribute('aria-label',`${heading.textContent} 바로가기`); heading.append(anchor);
+    });
+    article.querySelectorAll<HTMLPreElement>('pre.astro-code').forEach(pre=>{
+      const code=pre.querySelector('code'); if(!code)return;
+      const wrapper=document.createElement('div'); wrapper.className='code-wrapper'; pre.before(wrapper); wrapper.append(pre); pre.tabIndex=0;
+      const button=document.createElement('button'); button.type='button'; button.className='code-copy'; button.textContent='복사'; button.setAttribute('aria-label','코드 복사'); wrapper.append(button);
+      button.addEventListener('click',async()=>{
+        try { await navigator.clipboard.writeText(code.textContent ?? ''); button.textContent='복사됨'; }
+        catch { button.textContent='직접 선택해 복사'; }
+        setTimeout(()=>button.textContent='복사',1500);
+      });
+    });
+  }
+  enhanceArticle();
+  document.addEventListener('astro:page-load',enhanceArticle);
+</script>

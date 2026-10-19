@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import Card from '@/components/Card.astro';
+import CategoryNav from '@/components/CategoryNav.astro';
+import IconRss from '@/assets/icons/IconRss.svg';
+import config from '@/config';
+import { getSortedPosts } from '@/utils/getSortedPosts';
+import { getCategories, getCategoryLabel, getPostCategories } from '@/lib/categories';
+interface Props { selected?: string; home?: boolean }
+const {selected,home=false}=Astro.props;
+const allPosts=getSortedPosts(await getCollection('log'));
+const posts=selected ? allPosts.filter(post=>getPostCategories(post.data).includes(selected)) : allPosts;
+const categories=getCategories(allPosts);
+const label=selected ? getCategoryLabel(selected) : '게시물';
+const ArchiveHeading = home ? 'h2' : 'h1';
+const years=[...new Set(posts.map(post=>post.data.date.getUTCFullYear()))];
+---
+<Layout title={home ? 'dobidugi — 개발 노트' : `${label} | dobidugi`} description={selected ? `${label}에 관한 글 ${posts.length}편. dobidugi의 개발 노트.` : undefined}>
+  <Header />
+  <main id="main-content" class="app-layout archive-main">
+    {home && <section class="home-intro">
+      <div class="flex items-center gap-3"><h1 class="text-2xl font-semibold sm:text-3xl">개발 노트</h1><a href="/rss.xml" aria-label="RSS 구독" class="text-accent shrink-0"><IconRss /></a></div>
+      <p class="mt-4 text-muted-foreground leading-relaxed">{config.site.description}</p>
+    </section>}
+    <section aria-labelledby="archive-title">
+      <div class="archive-heading"><ArchiveHeading id="archive-title" class="text-xl font-semibold">{label}</ArchiveHeading><span class="text-muted-foreground text-sm">{selected ? `${posts.length}편 / 전체 ${allPosts.length}편` : `전체 ${posts.length}편`}</span></div>
+      <CategoryNav {categories} total={allPosts.length} {selected} />
+      <div id="post-archive">
+        {years.map(year=><section class="post-year" aria-labelledby={`year-${year}`}><h3 id={`year-${year}`} class="text-muted-foreground text-sm">{year}</h3><ul>{posts.filter(post=>post.data.date.getUTCFullYear()===year).map(post=><Card {...post} variant="h3" />)}</ul></section>)}
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+<script>
+  // Remember the real category route for the article's back link.
+  function rememberArchive() {
+    if(document.querySelector('#post-archive')) sessionStorage.setItem('backUrl',location.pathname+location.search);
+  }
+  rememberArchive();
+  document.addEventListener('astro:page-load',rememberArchive);
+</script>

@@ -1,176 +1,50 @@
 ---
-title: "Oauth 인증"
+title: "OAuth로 소셜 로그인 흐름 이해하기"
 date: 2026-07-20
 category: "CS"
 tags: ["reference","Oauth","CS","Backend"]
-description: "사용자가 서비스에 ID/PW를 직접 입력하지 않고, 이미 가입된 외부 서비스(Google, Apple, Kakao 등)를 통해 인증하는 방식."
-minutes: 6
+description: "소셜 로그인은 외부 서비스가 확인한 사용자 정보를 우리 서비스의 회원과 연결하는 과정이다. OAuth 2.0과 OIDC의 역할, 토큰의 용도, 로그인 상태를 관리하는 위치를 구분해 살펴본다."
+minutes: 3
 ---
-사용자가 서비스에 ID/PW를 직접 입력하지 않고, 이미 가입된 외부 서비스(Google, Apple, Kakao 등)를 통해 인증하는 방식.
-외부 서비스는 사용자 동의 하에 Access Token을 발급하고, 우리 서비스는 이 토큰으로 사용자 정보(이메일, 이름 등)를 조회해 회원가입/로그인에 활용한다
+> <span class="co co-abstract">📋 요약 한 줄 요약</span>
+> 소셜 로그인은 외부 서비스가 확인한 사용자 정보를 우리 서비스의 회원과 연결하는 과정이다. OAuth 2.0과 OIDC의 역할, 토큰의 용도, 로그인 상태를 관리하는 위치를 구분해 살펴본다.
 
-# Oauth 흐름
+서비스에 ‘Google로 로그인’ 버튼을 넣으면 사용자는 새 비밀번호를 만들지 않고 기존 계정으로 가입할 수 있다. 우리 서비스는 Google이 확인한 사용자 정보를 받아 회원을 찾거나 새로 등록한다.
 
-<pre class="mermaid">
-sequenceDiagram
-    actor 사용자
-    participant 우리서비스
-    participant Google/Apple
+## OAuth 2.0과 OIDC의 역할
 
-    사용자-&gt;&gt;우리서비스: 소셜 로그인 버튼 클릭
-    우리서비스-&gt;&gt;사용자: 외부 서비스 로그인 페이지로 리다이렉트
-    사용자-&gt;&gt;Google/Apple: ID/PW 입력 및 권한 동의
-    Google/Apple-&gt;&gt;우리서비스: Authorization Code 전달 (redirect_uri)
-    우리서비스-&gt;&gt;Google/Apple: Authorization Code로 Access Token 요청
-    Google/Apple-&gt;&gt;우리서비스: Access Token (+ ID Token) 발급
-    우리서비스-&gt;&gt;Google/Apple: Access Token으로 사용자 정보 요청
-    Google/Apple-&gt;&gt;우리서비스: 사용자 정보 응답 (email, name 등)
-    우리서비스-&gt;&gt;사용자: 회원가입 or 로그인 처리 완료
-</pre>
+이 흐름을 이해하려면 OAuth 2.0과 OpenID Connect의 역할부터 구분하는 것이 좋다. OAuth 2.0은 외부 서비스의 리소스에 접근할 권한을 위임하는 방식이다. OpenID Connect(OIDC)는 그 위에 사용자 인증을 위한 규칙을 추가한다. Google 로그인에서는 OIDC의 ID Token으로 사용자를 확인할 수 있다. [Google OIDC 문서](https://developers.google.com/identity/openid-connect/openid-connect)
 
-# Client-Side vs Server-Side
+로그인 과정에 등장하는 값들은 용도가 다르다.
 
-## Client-Side (idToken 방식)
-프론트/앱이 OAuth Flow를 직접 처리하고, 백엔드는 idToken 검증만 담당한다.
-
-```
-앱/프론트 → Google SDK로 로그인 → idToken 획득
-         → POST /v1/oauth/google { idToken }
-백엔드   → Google tokeninfo API로 검증
-         → 유저 정보 추출 → JWT 발급
-```
-
-- 모바일 앱, SPA에 적합
-- `client_secret` 불필요
-- Spring OAuth2 의존성 불필요
-- Google tokeninfo 검증 시 `aud` 클레임으로 타 앱 토큰 공격 방어
-
-## Server-Side (Authorization Code 방식)
-백엔드가 OAuth Flow 전체를 담당한다.
-
-```
-프론트 → /oauth2/authorization/google (Spring이 자동 처리)
-       → Google 로그인 → code 발급
-       → /login/oauth2/code/google 콜백 (Spring이 자동 처리)
-백엔드 → code로 Google에 토큰 교환 → 유저 정보 조회
-       → JWT 발급 → 프론트로 redirect
-```
-
-- `client_secret` 필요 (백엔드에만 존재, 보안 유리)
-- Spring OAuth2 Client 의존성 사용 (`spring-boot-starter-oauth2-client`)
-- state 파라미터로 CSRF 방지 자동 처리
-- 새 provider 추가 시 `application.properties` 설정만 추가하면 됨
-
-## 선택 기준
-| | Client-Side | Server-Side |
-|---|---|---|
-| 모바일 앱 | ✅ 적합 | ❌ |
-| SPA (React/Vue) | ✅ 가능 | ✅ 가능 |
-| SSR | ❌ | ✅ 적합 |
-| client_secret 노출 위험 | 없음 (사용 안 함) | 없음 (백엔드에만 존재) |
-
-# Spring Security OAuth2 설정 (Server-Side)
-
-→ [Spring OAuth2 Client](/log/spring-oauth2-client/) 참고
-
-# client_id / client_secret
-
-OAuth2 표준 스펙(RFC 6749)에 정의된 개념으로 Google만의 것이 아니다.
-모든 OAuth2 provider(Google, Kakao, Naver, GitHub, Apple 등)가 동일하게 사용한다.
-
-| 항목 | 설명 | 공개 여부 |
-|---|---|---|
-| `client_id` | 우리 앱을 식별하는 ID | 공개 가능 |
-| `client_secret` | 우리 앱임을 증명하는 비밀키 | 백엔드에만 보관 |
-
-- Client-Side 방식은 `client_secret` 사용 안 함
-- Server-Side 방식은 `code → token` 교환 시 `client_secret` 필요
-- `client_secret`은 절대 프론트엔드/앱에 포함되면 안 됨
-
-# Spring OAuth2 Client 상세
-
-## 의존성
-```gradle
-implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-```
-
-## 자동 제공 엔드포인트
-Spring Security가 자동으로 아래 두 URL을 처리한다. 별도 컨트롤러 구현 불필요.
-
-| URL | 역할 |
+| 값 | 역할 |
 |---|---|
-| `/oauth2/authorization/{registrationId}` | Google 로그인 페이지로 redirect |
-| `/login/oauth2/code/{registrationId}` | Google 콜백 수신, code → token 교환 |
+| Authorization Code | 토큰으로 교환하기 위해 잠시 사용하는 코드 |
+| Access Token | 허용된 범위에서 외부 서비스의 API를 호출하는 데 사용하는 토큰 |
+| ID Token | 인증된 사용자에 관한 정보를 담은 토큰 |
 
-## 세션 설정 주의
-OAuth2 Authorization Code Flow는 CSRF 방지를 위해 `state` 파라미터를 서버 세션에 저장한다.
-`SessionCreationPolicy.STATELESS`로 설정하면 state 검증 실패로 로그인이 동작하지 않는다.
-→ **`IF_REQUIRED`** 로 설정해야 함
+## 백엔드에서 코드를 교환하는 흐름
 
-```java
-.sessionManagement(session ->
-    session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-```
+백엔드에서 Authorization Code를 교환하는 흐름은 다음과 같다.
 
-OAuth2 flow 완료 후 JWT 발급하고 나면 세션은 사용하지 않으므로 실질적으로 Stateless와 동일하게 동작한다.
+1. 사용자가 로그인 버튼을 누르면 외부 서비스의 로그인 화면으로 이동한다.
+2. 사용자가 로그인하고 필요한 권한에 동의한다.
+3. 외부 서비스가 등록된 콜백 주소로 Authorization Code를 전달한다.
+4. 백엔드가 요청의 유효성을 확인하고 코드를 토큰으로 교환한다.
+5. 백엔드가 사용자 정보를 검증한 뒤, 우리 서비스의 회원과 연결하고 로그인 상태를 만든다.
 
-## SecurityConfig 설정
-```java
-.oauth2Login(oauth2 -> oauth2
-    .userInfoEndpoint(userInfo -> userInfo
-        .oidcUserService(oAuth2LoginService))  // OIDC (Google)
-    .successHandler(oAuth2SuccessHandler)
-    .failureHandler(oAuth2FailureHandler)
-)
-```
+여기서 외부 서비스의 로그인과 우리 서비스의 로그인은 구분해야 한다. Google이 사용자를 확인해줬더라도, 우리 서비스는 그 사용자가 어떤 회원인지 판단하고 자체적인 로그인 상태를 관리해야 한다.
 
-## OAuth2LoginService
-`OidcUserService`를 상속받아 인증 성공 후 유저 정보를 처리한다.
-Strategy 패턴으로 provider별 유저 정보 추출 → DB 저장/조회 로직 수행.
+## SDK로 받은 ID Token을 검증하는 흐름
 
-```java
-@Service
-public class OAuth2LoginService extends OidcUserService {
+제공자의 SDK로 ID Token을 받아 백엔드에 전달하는 구성도 있다. 이때 백엔드는 토큰의 서명, 발급자, 대상 앱, 만료 시간을 검증한다. Google은 운영 환경에서 검증 라이브러리 사용을 권장하며, `tokeninfo` 엔드포인트는 개발·디버깅 용도로 안내한다. 회원을 연결할 때는 변경될 수 있는 이메일보다 제공자의 사용자 식별자인 `sub`를 기준으로 삼는다. [Google ID Token 검증 안내](https://developers.google.com/identity/gsi/web/guides/verify-google-id-token)
 
-    @Override
-    public OidcUser loadUser(OidcUserRequest userRequest) {
-        OidcUser oidcUser = super.loadUser(userRequest);
-        // provider 식별 → Strategy로 유저 정보 추출
-        // DB에서 회원 조회 or 신규 가입 처리
-        return oidcUser;
-    }
-}
-```
+구현 방식을 ‘모바일은 클라이언트 방식, 웹은 서버 방식’으로 나눌 필요는 없다. 네이티브 앱도 Authorization Code와 PKCE를 사용한다. 플랫폼 이름보다 제공자가 지원하는 흐름, 백엔드의 역할, 토큰을 다루는 위치를 기준으로 선택하는 편이 정확하다. [네이티브 앱 OAuth 표준](https://www.rfc-editor.org/rfc/rfc8252)
 
-## SuccessHandler
-인증 성공 후 JWT를 발급하고 프론트엔드로 redirect한다.
+## 비밀값과 우리 서비스의 로그인 상태
 
-```java
-@Component
-public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
-    @Override
-    public void onAuthenticationSuccess(...) {
-        // 1. OAuth2User에서 유저 정보 추출
-        // 2. JWT 발급
-        // 3. 프론트엔드로 redirect (token을 query param으로 전달)
-        response.sendRedirect(redirectUrl + "?token=" + accessToken);
-    }
-}
-```
+`client_id`는 앱을 식별하는 공개 값이다. `client_secret`을 사용하는 구성에서는 이를 백엔드에 보관한다. 브라우저 코드나 배포되는 모바일 앱에 비밀값을 넣어두고 안전하다고 가정해서는 안 된다.
 
-## FailureHandler
-인증 실패 시 프론트엔드 에러 페이지로 redirect한다.
+우리 서비스가 브라우저에 자체 Access Token과 Refresh Token을 발급한다면, Access Token은 메모리에만 두고 Refresh Token은 서버가 설정하는 HttpOnly 쿠키로 관리한다. 운영 환경에서는 Secure와 적절한 SameSite 정책을 적용하고, 갱신·로그아웃 요청에도 CSRF 방어를 적용한다. 토큰을 리다이렉트 URL에 붙이거나 브라우저 저장소에 남기는 흐름은 사용하지 않는다.
 
-```java
-@Component
-public class OAuth2FailureHandler implements AuthenticationFailureHandler {
-    @Override
-    public void onAuthenticationFailure(...) {
-        response.sendRedirect(redirectUrl + "/error");
-    }
-}
-```
-
-## 멀티 서버 환경 주의
-OAuth2 flow 중 세션을 사용하므로 다중 서버 배포 시 세션 공유가 필요하다.
-→ Spring Session + Redis 도입 고려
+Spring Security에서는 `oauth2Login()`으로 Authorization Code 기반 로그인을 구성할 수 있다. 실제 설정과 사용자 처리 코드는 [Spring OAuth2 Client](/log/spring-oauth2-client/) 글에서 이어서 다룬다. [Spring Security 문서](https://docs.spring.io/spring-security/reference/servlet/oauth2/login/core.html)

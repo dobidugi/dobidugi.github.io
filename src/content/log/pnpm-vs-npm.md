@@ -1,166 +1,59 @@
 ---
-title: "pnpm vs npm — 차이와 선택 기준"
+title: "pnpm과 npm, 무엇이 다르고 언제 선택하면 좋을까?"
 date: 2026-09-07
 category: "FE"
 tags: ["reference","프론트엔드","Node","pnpm","npm","패키지매니저"]
-description: "둘 다 package.json을 읽는 Node 패키지 매니저지만, pnpm은 global content-addressable store + hard link로 디스크와 설치 시간을 아끼고, hois…"
-minutes: 9
+description: "npm과 pnpm의 차이는 패키지 파일의 재사용 방식과 의존성을 노출하는 구조에 있다. 프로젝트의 요구와 팀의 실행 환경을 기준으로 선택하고, 버전과 lock 파일을 함께 관리한다."
+minutes: 3
 ---
 > <span class="co co-abstract">📋 요약 한 줄 요약</span>
-> 둘 다 `package.json`을 읽는 Node 패키지 매니저지만, pnpm은 **global content-addressable store + hard link**로 디스크와 설치 시간을 아끼고, **hoisting 없는 symlinked node_modules**로 선언하지 않은 패키지의 import(phantom dependency)를 막는다. 프로젝트에 `pnpm-lock.yaml`과 `packageManager` 필드가 있으면 pnpm이 정본이다.
+> npm과 pnpm의 차이는 패키지 파일의 재사용 방식과 의존성을 노출하는 구조에 있다. 프로젝트의 요구와 팀의 실행 환경을 기준으로 선택하고, 버전과 lock 파일을 함께 관리한다.
 
-## 개요
+npm과 pnpm은 모두 `package.json`에 적힌 패키지를 설치하는 도구다. 일상적으로 사용하는 명령어도 비슷하다. 차이는 패키지 파일을 저장하고, 프로젝트에서 의존성을 찾아 쓰게 만드는 방식에 있다.
 
-- **npm**: Node에 기본 포함된 패키지 매니저. 별도 설치 없이 쓸 수 있고 레퍼런스 구현 역할.
-- **pnpm**: "performant npm". npm의 두 가지 고질적 문제(디스크 낭비, phantom dependency)를 구조적으로 해결하기 위해 나온 대안. yarn berry의 PnP와 달리 node_modules 디렉터리를 그대로 유지해서 기존 도구 호환성이 높다.
-- 명령어 체계는 거의 같아서 npm을 알면 바로 쓸 수 있다.
+## 같은 패키지를 여러 프로젝트에서 쓴다면
 
-## 1. 저장 방식 — copy vs hard link
+두 프로젝트가 같은 버전의 React를 사용한다고 해보자. npm은 각 프로젝트의 `node_modules`에 패키지를 설치한다. 다운로드한 데이터는 캐시에 보관하므로, 프로젝트를 만들 때마다 모든 패키지를 다시 내려받는 것은 아니다. [npm 캐시 문서](https://docs.npmjs.com/cli/v11/commands/npm-cache/)
 
-| | npm | pnpm |
+pnpm은 공용 저장소에 보관한 패키지 파일을 여러 프로젝트에서 재사용한다. 비슷한 의존성을 사용하는 프로젝트가 많을수록 디스크 공간을 절약하기 좋다. 실제 연결 방식은 파일시스템과 설정에 따라 달라지므로 절약되는 용량이나 설치 속도를 일정한 배수로 계산하기는 어렵다. [pnpm 저장 방식](https://pnpm.io/motivation)
+
+## 직접 설치하지 않은 패키지가 보이는 이유
+
+또 다른 차이는 **직접 설치하지 않은 패키지가 코드에서 보일 수 있는가**다.
+
+```text
+내 프로젝트
+└─ package-a
+   └─ package-b
+```
+
+프로젝트에 `package-a`만 추가했지만, 코드에서 `package-b`를 직접 가져다 쓸 수 있는 경우가 있다. npm의 기본 설치 구조에서는 중복을 줄이기 위해 하위 의존성이 상위 `node_modules`로 배치되기도 하기 때문이다. 이를 호이스팅이라고 한다.
+
+이렇게 직접 선언하지 않은 패키지에 의존하면, `package-a`를 업데이트했을 때 코드가 갑자기 실행되지 않을 수 있다. 우리 코드가 사용하는 패키지는 `package.json`에도 직접 선언하는 편이 안전하다.
+
+pnpm의 기본 구조는 최상위에 직접 의존성을 연결하므로 이런 누락을 발견하는 데 도움이 된다. pnpm도 내부적으로 호이스팅을 사용하지만, 의존성 패키지끼리 접근하는 영역과 애플리케이션에 공개되는 영역을 구분한다. 필요한 경우 공개 범위를 바꿀 수 있으며, 설정은 사용 중인 버전의 문서를 기준으로 적용한다. [pnpm 의존성 배치와 설정](https://pnpm.io/settings/node-modules)
+
+## 자주 쓰는 명령어
+
+자주 쓰는 명령어는 다음과 같다.
+
+| 작업 | npm | pnpm |
 |---|---|---|
-| 패키지 파일 위치 | 프로젝트마다 `node_modules`에 **복사** | 전역 content-addressable store(`~/Library/pnpm/store`)에 **한 번만** 저장 |
-| 프로젝트와 연결 | 없음 (독립 복사본) | 저장소 → `node_modules/.pnpm/` **하드링크**, 그 위에 심볼릭 링크 |
-| 같은 버전을 10개 프로젝트가 쓰면 | 10번 다운로드·10배 디스크 | 1번 다운로드·디스크 1배 |
-
-- 하드링크라서 파일 내용은 하나인데 여러 경로에서 접근된다. `du`로 보면 프로젝트별로 용량이 잡히지만 실제 디스크 점유는 한 번이다.
-- 캐시가 이미 있으면 네트워크 없이도 설치가 끝나서 CI·재설치가 빠르다.
-
-## 2. node_modules 구조 — flat(hoisting) vs symlinked(non-flat)
-
-**npm — flat node_modules (hoisting)**
-
-```
-node_modules/
-  express/
-  body-parser/      ← express의 의존성인데 최상위에 올라옴
-  debug/            ← 마찬가지
-```
-
-- 중첩된 transitive dependency를 최상위로 끌어올려(hoist) 한 층에 펼친다. 중복 설치를 줄이는 게 목적.
-- 부작용: `package.json`에 `express`만 적어도 `import "debug"`가 **동작한다**. 이것이 **phantom dependency**(유령 의존성). express가 나중에 debug를 버리면 내 코드가 이유 없이 깨진다.
-- 버전 충돌이 나면 하나만 최상위에 올리고 나머지는 중첩되어, 어느 버전이 로드될지 트리 모양에 따라 달라진다.
-
-**pnpm — symlinked node_modules (non-flat, no hoisting)**
-
-```
-node_modules/
-  express -> .pnpm/express@4.19.2/node_modules/express
-  .pnpm/
-    express@4.19.2/node_modules/
-      express/
-      body-parser -> ../../body-parser@1.20.2/node_modules/body-parser
-      debug -> ../../debug@2.6.9/node_modules/debug
-```
-
-- hoist하지 않는다. 최상위에는 **내가 직접 선언한 패키지만** symlink로 노출된다.
-- 각 패키지는 `.pnpm/<이름>@<버전>/node_modules/` 안에 자기 의존성만 옆에 두고 산다. Node의 모듈 해석 규칙(상위 `node_modules`를 타고 올라감)을 그대로 이용해서 동작한다.
-- 선언하지 않은 `debug`를 import하면 **즉시 에러**. 의존성 선언이 정직해진다.
-- 대가: 일부 오래된 도구가 symlink를 못 따라가는 경우가 있다. 이때 `.npmrc`에 `shamefully-hoist=true` 또는 `public-hoist-pattern[]=...`으로 특정 패키지만 끌어올릴 수 있다. 이름 그대로 "부끄러운" 우회책이니 최소한으로.
-
-## 3. lock 파일
-
-| npm | pnpm |
-|---|---|
-| `package-lock.json` | `pnpm-lock.yaml` |
-
-- 서로 **호환되지 않는다**. 한 프로젝트에 둘 다 있으면 누가 어떤 매니저로 설치했느냐에 따라 결과가 달라진다. 하나만 남긴다.
-- `pnpm import`로 `package-lock.json`을 `pnpm-lock.yaml`로 변환할 수 있다.
-- CI에서는 `npm ci` ↔ `pnpm install --frozen-lockfile` 이 대응된다. lock과 `package.json`이 어긋나면 실패시킨다.
-
-## 4. 명령어 대응표
-
-| 하려는 일 | npm | pnpm |
-|---|---|---|
-| 의존성 설치 | `npm install` | `pnpm install` (`pnpm i`) |
+| 의존성 설치 | `npm install` | `pnpm install` |
 | 패키지 추가 | `npm install zod` | `pnpm add zod` |
-| dev 의존성 추가 | `npm install -D vite` | `pnpm add -D vite` |
-| 제거 | `npm uninstall zod` | `pnpm remove zod` |
-| 스크립트 실행 | `npm run dev` | `pnpm dev` (`run` 생략 가능) |
-| 일회성 실행 | `npx biome check` | `pnpm dlx biome check` / `pnpm exec biome check` |
-| 업데이트 | `npm update` | `pnpm update` (`pnpm up`) |
-| 왜 설치됐는지 | `npm ls debug` | `pnpm why debug` |
-| lock 고정 설치(CI) | `npm ci` | `pnpm install --frozen-lockfile` |
+| 개발용 패키지 추가 | `npm install -D vite` | `pnpm add -D vite` |
+| 패키지 제거 | `npm uninstall zod` | `pnpm remove zod` |
+| 개발 서버 실행 | `npm run dev` | `pnpm run dev` |
+| CI 설치 | `npm ci` | `pnpm install --frozen-lockfile` |
 
-- `pnpm dlx`는 설치 안 된 패키지를 임시로 받아 실행(npx와 같음), `pnpm exec`는 이미 설치된 바이너리 실행. npx는 둘을 하나로 뭉쳐놨다.
+## 팀에서 버전과 lock 파일 맞추기
 
-## 5. monorepo workspace
+팀에서는 명령어보다 실행 버전과 lock 파일을 일치시키는 것이 중요하다. npm은 `package-lock.json`, pnpm은 `pnpm-lock.yaml`을 사용한다. 하나의 프로젝트에서 두 매니저를 번갈아 사용하기보다 팀이 정한 매니저와 lock 파일을 함께 관리한다.
 
-- pnpm은 `pnpm-workspace.yaml` 하나로 워크스페이스를 정의한다. `workspace:*` 프로토콜로 내부 패키지를 참조하면 publish 시 실제 버전으로 치환된다.
-- `pnpm -r run build`(재귀), `pnpm --filter <pkg> dev`(특정 패키지) 같은 필터링이 강력하다.
-- npm도 v7부터 `workspaces` 필드를 지원하지만 필터링·격리 면에서 pnpm이 더 성숙하다. Turborepo, Nx 같은 도구도 pnpm과 조합이 흔하다.
+기존 프로젝트에 참여했다면 `packageManager` 필드, README, CI 설정부터 확인한다. Corepack은 프로젝트가 지정한 패키지 매니저와 버전을 실행하도록 돕는다. Node.js 25부터 기본 배포에 포함되지 않지만 별도로 설치해 사용할 수 있다. [Corepack 공식 문서](https://github.com/nodejs/corepack)
 
-## 6. pnpm 설치 방법과 corepack
+## 워크스페이스와 선택 기준
 
-pnpm은 Node에 포함되어 있지 않아서 **따로 설치**해야 한다. 방법은 세 가지.
+npm과 pnpm 모두 워크스페이스를 지원한다. pnpm에서는 `pnpm-workspace.yaml`로 여러 앱과 공용 패키지를 묶고, `--filter`로 특정 패키지의 작업을 실행할 수 있다. 이런 방식이 팀의 개발 흐름에 잘 맞는지도 선택 기준이 된다. [pnpm 워크스페이스](https://pnpm.io/workspaces)
 
-| 방법 | 명령 | 특징 |
-|---|---|---|
-| npm으로 전역 설치 | `npm install -g pnpm@11.21.0` | 가장 단순. 프로젝트의 `packageManager` 버전과 맞춰 설치하면 된다 |
-| Homebrew | `brew install pnpm` | 최신 버전이 깔린다. 버전 고정이 필요하면 부적합 |
-| corepack | `corepack enable` | `packageManager` 필드를 읽어 버전을 자동으로 맞춘다. 단, Node 버전에 따라 corepack이 없을 수 있다(아래) |
-
-### packageManager 필드
-
-```json
-{ "packageManager": "pnpm@11.21.0" }
-```
-
-- 프로젝트가 어떤 매니저·버전을 쓰는지 선언한다. pnpm 자체도 이 필드를 읽어서, 다른 버전으로 실행하면 경고한다.
-- 팀원마다 pnpm 버전이 달라 lock 파일이 흔들리는 문제를 막는 용도.
-
-### corepack — Node 버전에 따라 있고 없다
-
-- corepack은 `packageManager` 필드를 읽어 선언된 매니저를 자동으로 내려받아 실행해주는 도구. `corepack enable`을 하면 `pnpm`, `yarn` 명령이 shim으로 생긴다.
-- **Node 16.9 ~ 24**: Node 배포판에 **번들**되어 있어 `corepack enable`만 하면 된다.
-- **Node 25 이상**: 배포판에서 **제거**되었다. `corepack` 명령이 없으므로 쓰려면 `npm install -g corepack`으로 따로 설치해야 한다. 이 경우 굳이 corepack을 거칠 이유가 줄어들어, 그냥 pnpm을 직접 설치하는 편이 단순하다.
-- Homebrew로 설치한 Node도 corepack을 빼고 배포하는 경우가 있어, `which corepack`으로 먼저 확인한다.
-
-> <span class="co co-tip">💡 TIP 실전 판단</span>
-> `node -v`가 25 이상이면 `npm i -g pnpm@<packageManager 버전>`으로 바로 설치한다. 24 이하면 `corepack enable`이 가장 편하다.
-
-## 예시
-
-### 유령 의존성 재현
-
-```bash
-# npm
-mkdir ghost-npm && cd ghost-npm && npm init -y
-npm install express
-node -e 'require("debug")'        # 동작함 — debug는 선언 안 했는데 hoisting으로 노출
-
-# pnpm
-mkdir ghost-pnpm && cd ghost-pnpm && pnpm init
-pnpm add express
-node -e 'require("debug")'        # Error: Cannot find module 'debug'
-```
-
-### 기존 프로젝트를 pnpm으로 정리
-
-```bash
-npm i -g pnpm@11.21.0             # Node 25+ (corepack 없음). Node ≤24 는 corepack enable
-pnpm import                       # package-lock.json → pnpm-lock.yaml
-rm package-lock.json              # lock 파일은 하나만
-rm -rf node_modules && pnpm install
-```
-
-### symlink를 못 따라가는 도구 우회
-
-```ini
-# .npmrc
-public-hoist-pattern[]=*eslint*
-public-hoist-pattern[]=*prettier*
-```
-
-## 선택 기준
-
-- **pnpm을 고른다**: 로컬에 프로젝트가 여러 개, monorepo, CI 설치 시간이 아깝다, dependency 선언을 엄격하게 관리하고 싶다(phantom dependency 차단).
-- **npm으로 충분하다**: 단일 소규모 프로젝트, 추가 설치 없이 돌아가야 하는 환경(교육용 예제, 배포 스크립트), 팀이 pnpm에 익숙하지 않고 도입 비용을 감수할 이유가 없다.
-- 어느 쪽이든 **lock 파일은 하나만**, `packageManager` 필드는 적어두는 것이 좋다.
-
-## 링크
-
-- [pnpm — Motivation](https://pnpm.io/motivation)
-- [pnpm — Symlinked node_modules structure](https://pnpm.io/symlinked-node-modules-structure)
-- [npm — package-lock.json](https://docs.npmjs.com/cli/configuring-npm/package-lock-json)
-- [Node.js — corepack](https://nodejs.org/api/corepack.html)
+여러 프로젝트의 파일을 재사용하거나 의존성 누락을 빨리 발견하고 싶다면 pnpm을 검토할 만하다. 기존 환경이 npm으로 안정적으로 운영되고 있고 바꿔야 할 문제가 없다면 npm을 계속 사용해도 된다.

@@ -35,6 +35,7 @@ const NOTES = [
   { src: 'References/Spring/Spring OAuth2 Client.md', slug: 'spring-oauth2-client', category: 'SPRING' },
   { src: 'References/Security/접근제어(RBAC, ABAC).md', slug: 'access-control-rbac-abac', category: 'SECURITY' },
   { src: 'References/Security/암복호화.md', slug: 'encryption-decryption', category: 'SECURITY' },
+  { src: 'References/Security/SBOM — 소프트웨어 자재명세서와 CycloneDX Gradle 플러그인.md', slug: 'sbom-cyclonedx-gradle', category: 'SECURITY' },
   { src: 'References/Security/Semgrep — 코드를 패턴으로 읽는 SAST 엔진.md', slug: 'semgrep', category: 'penetration-testing' },
   { src: 'References/Security/SARIF — 보안 스캐너 결과의 공통 언어.md', slug: 'sarif', category: 'penetration-testing' },
   { src: 'References/RN/Expo.md', slug: 'expo', category: 'RN' },
